@@ -1,9 +1,9 @@
 CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++17 -ggdb3
+CXXFLAGS = -Wall -Wextra -std=c++17 -ggdb3 -o0
 LDFLAGS = -lm
 .PHONY: clean all
 
-all: testvector2 testvector3 breakoutt
+all: breakoutt testvector2 testvector3 testvector4
 run: run_breakoutt run_testvector2 run_testvector3 run_testvector4 
 
 build:
