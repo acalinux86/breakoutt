@@ -124,100 +124,144 @@ Vector3 Vector3::normalize() const
     else return Vector3(getX()/mag, getY()/mag, getZ()/mag);
 }
 
-// // NOTE: Vector4 Implementation
+// NOTE: Vector4 Implementation
 
-// // Pseudo Constructor for Vector4
-// Vector4 v4_init(float x, float y, float z, float w)
-// {
-//     return (Vector4){x, y, z, w};
-// }
+// Constructors for Vector4
+Vector4::Vector4(float x, float y, float z, Vector4Type type):
+    x(x), y(y), z(z), type(type), w(type == Vector4Type::Point ? 1.0f : 0.0f) {}
 
-// // Constructor for Vector4 Point
-// Vector4 v4_point(float x, float y, float z)
-// {
-//     return v4_init(x, y, z, 1.0f);
-// }
+Vector4::Vector4(float x, float y, float z, float w):
+    x(x), y(y), z(z), w(w) {}
 
-// // Constructor for Vector4 Direction
-// Vector4 v4_direction(float x, float y, float z)
-// {
-//     return v4_init(x, y, z, 0.0f);
-// }
+void Vector4::print() const
+{
+    if (getW() != 0) {
+        printf("Point: [%.2f, %.2f, %.2f, %.2f]\n", getX(), getY(), getZ(), getW());
+    } else {
+        printf("Direction: [%.2f, %.2f, %.2f, %.2f]\n", getX(), getY(), getZ(), getW());
+    }
+}
 
-// void v4_print(const Vector4 *self, const char *name)
-// {
-//     if (self->w != 0) {
-//         printf("Point (%s): [%.2f, %.2f, %.2f, %.2f]\n", name, self->x, self->y, self->z, self->w);
-//     } else {
-//         printf("Direction (%s): [%.2f, %.2f, %.2f, %.2f]\n", name, self->x, self->y, self->z, self->w);
-//     }
-// }
+float Vector4::getX() const
+{
+    return x;
+}
 
-// Vector4 v4_add(Vector4 a, Vector4 b) {
-//     return v4_init(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w); // Operates on all components
-// }
+float Vector4::getY() const
+{
+    return y;
+}
 
-// // Function that Subtracts Two Vector
-// Vector4 v4_sub(Vector4 a, Vector4 b) {
-//     return v4_init(a.x-b.x, a.y-b.y, a.z-b.z, a.w - b.w); // Operates on all components
-// }
+float Vector4::getZ() const
+{
+    return z;
+}
 
-// // Function that returns the Dot Product of two Vectors -> (a float)
-// float v4_dot(Vector4 a, Vector4 b) {
-//     return (a.x*b.x) + (a.y*b.y) + (a.z*b.z);
-// }
+float Vector4::getW() const
+{
+    return w;
+}
 
-// // Function that Returns A Cross Product of two Vectors
-// Vector4 v4_cross(Vector4 a, Vector4 b) {
-//     float cross_x = a.y * b.z - a.z * b.y;
-//     float cross_y = a.z * b.x - a.x * b.z;
-//     float cross_z = a.x * b.y - a.y * b.x;
+Vector4Type Vector4::getType() const
+{
+    return type;
+}
 
-//     return v4_init(cross_x, cross_y, cross_z, 0); // cross product always returns direction
-// }
+Vector4 Vector4::operator+(const Vector4& other) const
+{
+    if (getType() == Vector4Type::Point && other.getType() == Vector4Type::Point)
+        assert(false && "Cannot Add Two Points");
+    return Vector4(getX() + other.getX(), getY() + other.getY(), getZ() + other.getZ(),
+                   (getType() == Vector4Type::Point) ? 1.0f : 0.0f); // Operates on all components
+}
 
-// // Scale A 4D Vector by a value
-// Vector4 v4_scale(Vector4 a, float value) {
-//     // Preserve w (0 for directions) (1 for points)
-//     return v4_init(a.x*value, a.y*value, a.z*value, a.w);
-// }
+// Function that Subtracts Two Vector
+Vector4 Vector4::operator-(const Vector4& other) const
+{
+    if (getType() == Vector4Type::Direction && other.getType() == Vector4Type::Point)
+        assert(false && "Cannot subtract a point from a direction");
 
-// // Length of a vector
-// float v4_length(Vector4 a)
-// {
-//     // Only Compute Length for 3d Products (Homogenous coordinates)
-//     return sqrtf(((a.x*a.x)+(a.y*a.y)+(a.z*a.z)));
-// }
+    if (getType() == Vector4Type::Point && other.getType() == Vector4Type::Point)
+        return Vector4(x - other.x, y - other.y, z - other.z, Vector4Type::Direction);
+    return Vector4(getX() - other.getX(), getY() - other.getY(), getZ() - other.getZ(),
+                   (getType() == Vector4Type::Point) ? 1.0f : 0.0f); // Operates on all components
+}
 
-// // Function that Normalizes a 4D Vector
-// Vector4 v4_normalize(Vector4 a)
-// {
-//     float mag = v4_length(a);
-//     if (mag == 0.0f) return v4_init(0.0f, 0.0f, 0.0f, a.w); // Preserve Original w
-//     else return v4_init(a.x/mag, a.y/mag, a.z/mag, a.w); // Preserve Original w
-// }
+// Function that returns the Dot Product of two Vectors -> (a float)
+float Vector4::operator*(const Vector4& other) const
+{
+    ASSERT_DIRECTION(*this);
+    ASSERT_DIRECTION(other);
+    return ((getX()*other.getX()) + (getY()*other.getY()) + (getZ()*other.getZ()));
+}
 
-// Vector4 v4_perspective_divide(Vector4 a)
-// {
-//     if (a.w == 0) return a;
-//     else return v4_point(a.x/a.w, a.y/a.w, a.z/a.w);
-// }
+// Function that Returns A Cross Product of two Vectors
+Vector4 Vector4::cross(const Vector4& other) const
+{
+    ASSERT_DIRECTION(*this);
+    ASSERT_DIRECTION(other);
+    float cross_x = getY() * other.getZ() - getZ() * other.getY();
+    float cross_y = getZ() * other.getX() - getX() * other.getZ();
+    float cross_z = getX() * other.getY() - getY() * other.getX();
 
-// bool v4_equals(Vector4 a, Vector4 b)
-// {
-//     if (a.w != b.w) return false;
-//     if (a.w == 0) {
-//         return (a.x == b.x) && (a.y == b.y) && (a.z == b.z);
-//     } else {
-//         Vector4 norm_a = v4_perspective_divide(a);
-//         Vector4 norm_b = v4_perspective_divide(b);
+    return Vector4(cross_x, cross_y, cross_z, Vector4Type::Direction); // cross product always returns direction
+}
 
-//         return  (norm_a.x == norm_b.x) &&
-//                 (norm_a.y == norm_b.y) &&
-//                 (norm_a.z == norm_b.z);
-//     }
-// }
+// Scale A 4D Vector by a value
+Vector4 Vector4::operator*(float value) const
+{
+    if (getType() == Vector4Type::Point)
+        assert(false && "Scaling Point Not Geomerically Valid");
+    return Vector4(getX()*value, getY()*value, getZ()*value, getW());
+}
 
+// Length of a vector
+float Vector4::length() const
+{
+    ASSERT_DIRECTION(*this);
+    // Only Compute Length for 3d Products (Homogenous coordinates)
+    return sqrtf(((getX()*getX())+(getY()*getY())+(getZ()*getZ())));
+}
+
+// Function that Normalizes a 4D Vector
+Vector4 Vector4::normalize() const
+{
+    ASSERT_DIRECTION(*this);
+    float mag = length();
+    if (mag == 0.0f) return Vector4(0.0f, 0.0f, 0.0f, getW()); // Preserve Original w
+    else return Vector4(getX()/mag, getY()/mag, getZ()/mag, getW()); // Preserve Original w
+}
+
+Vector4 Vector4::perspective_divide() const
+{
+    if (getW() == 0) return Vector4(getX(), getY(), getZ(), getW());
+    else return Vector4(getX()/getW(), getY()/getW(), getZ()/getW(), Vector4Type::Point);
+}
+
+bool Vector4::operator==(const Vector4& other) const
+{
+    const float epsilion = 1e-3;
+    if (getW() != other.getW()) return false;
+    if (getW() == 0) {
+        return (fabs(getX() - other.getX()) < epsilion)
+            && (fabs(getY() - other.getY()) < epsilion)
+            && (fabs(getZ() - other.getZ()) < epsilion)
+            && (getType() == other.getType());
+    } else {
+        Vector4 norm_a = perspective_divide();
+        Vector4 norm_b = other.perspective_divide();
+
+        return  (fabs(norm_a.getX() - norm_b.getX()) < epsilion)
+            &&  (fabs(norm_a.getY() - norm_b.getY()) < epsilion)
+            &&  (fabs(norm_a.getZ() - norm_b.getZ()) < epsilion)
+            &&  (norm_a.getType() == norm_b.getType());
+    }
+}
+
+bool Vector4::operator!=(const Vector4& other) const
+{
+    return !(*this == other);
+}
 
 // // Matrix4 Implementation
 // static inline void safe_memcpy(Matrix4 *dest, Matrix4 *src)
