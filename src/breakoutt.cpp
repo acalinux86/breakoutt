@@ -2,11 +2,6 @@
 
 int main(void)
 {
-    Vector2 position(1.0f, 1.0f);
-    float value = 10.0;
-    position.print();
-
-    Vector2 scaled = position * value;
-    scaled.print();
+    printf("Hello, From Breakoutt\n");
     return 0;
 }
