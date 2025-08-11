@@ -10,7 +10,7 @@
 // Vector2
 struct Vector2 {
 public:
-    Vector2(float x, float y); 
+    Vector2(float x, float y);
     void print() const;
 
     float getX() const;
@@ -33,27 +33,27 @@ private:
 // Vector3
 
 // NOTE: VECTOR3 STRUCTURE
-typedef struct {
+struct Vector3 {
+public:
+    // NOTE: VECTOR3 PROTOTYPES
+    Vector3 v3_init(float x, float y, float z);
+    void v3_print(const Vector3 *self);
+
+    Vector3 operator+(const Vector3& other);
+    Vector3 operator-(Vector3 a, Vector3 b);
+
+    Vector3 operator*(Vector3 a, float value);
+    Vector3 operator*(Vector3 a, Vector3 b);
+    float   operator*(Vector3 a, Vector3 b);
+
+    float v3_length(Vector3 a);
+    Vector3 v3_normalize(Vector3 a);
+
+private:
     float x;
     float y;
     float z;
-} Vector3;
-
-
-// NOTE: VECTOR3 PROTOTYPES
-Vector3 v3_init(float x, float y, float z);
-void v3_print(const Vector3 *self);
-
-Vector3 v3_add(Vector3 a, Vector3 b);
-Vector3 v3_sub(Vector3 a, Vector3 b);
-
-Vector3 v3_scale(Vector3 a, float value);
-Vector3 v3_cross(Vector3 a, Vector3 b);
-float v3_dot(Vector3 a, Vector3 b);
-
-float v3_length(Vector3 a);
-Vector3 v3_normalize(Vector3 a);
-
+};
 
 // Vector4
 
