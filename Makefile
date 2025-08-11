@@ -8,8 +8,8 @@ all: build/breakoutt
 build:
 	mkdir -p build/
 
-build/breakoutt: breakoutt.cpp | build
-	$(CC) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+build/breakoutt: src/breakoutt.cpp src/math_util.cpp | build
+	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 clean:
 	rm -rf build/
