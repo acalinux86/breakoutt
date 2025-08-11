@@ -3,7 +3,8 @@ CXXFLAGS = -Wall -Wextra -std=c++17 -ggdb3
 LDFLAGS = -lm
 .PHONY: clean all
 
-all: test breakoutt
+all: testvector2 testvector3 breakoutt
+run: run_breakoutt run_testvector3 run_testvector2
 
 build:
 	mkdir -p build/
@@ -19,13 +20,18 @@ build/breakoutt: src/breakoutt.cpp build/math_util.o | build
 run_breakoutt:
 	./build/breakoutt
 
-test: build/test
-
-build/test: Test/test.cpp build/math_util.o | build
+# Tests
+testvector2: build/testvector2
+build/testvector2: Test/TestVector2.cpp build/math_util.o | build
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+run_testvector2:
+	./build/testvector2
 
-run_test:
-	./build/test
+testvector3: build/testvector3
+build/testvector3: Test/TestVector3.cpp build/math_util.o | build
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+run_testvector3:
+	./build/testvector3
 
 clean:
 	rm -rf build/

@@ -21,8 +21,8 @@ public:
     float operator*(const Vector2& other) const;
     Vector2 operator*(float value) const; // NOTE: If value is negative, direction reverses else unchanged
 
-    float length(); // NOTE: returns the Magnitude of a Vector
-    Vector2 normalize();
+    float length() const; // NOTE: returns the Magnitude of a Vector
+    Vector2 normalize() const;
 
 private:
     float x;
@@ -50,8 +50,8 @@ public:
     Vector3 operator*(float scalar) const;
     float   operator*(const Vector3& other) const;
 
-    float length();
-    Vector3 normalize();
+    float length() const;
+    Vector3 normalize() const;
 
 private:
     float x;

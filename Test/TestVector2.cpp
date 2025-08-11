@@ -72,7 +72,7 @@ void TestVector2Sub(void)
     assert(fabs(y -  20.00f) < epsilion);
 }
 
-void TestVectorMult(void)
+void TestVector2Mult(void)
 {
     Vector2 TestVector2A(5.5f, 6.57f);
     Vector2 TestVector2B(2.3f, 7.98f);
@@ -96,19 +96,22 @@ void TestVectorScale(void)
 
 void TestVector2Length(void)
 {
-    Vector2 TestVector2A(4.0f, 8.0f);
-
+    Vector2 TestVector2A(6.0f, 8.0f);
     float TestVector2ALength = TestVector2A.length();
-    assert(TestVector2ALength == 10.0f);
+    const float epsilion = 1e-5;
+    assert(fabs(TestVector2ALength - 10.0f) < epsilion);
 }
 
 void TestVector2Normalize(void)
 {
     Vector2 TestVector2A(4.0f, 8.0f);
-
     Vector2 TestVector2ANormalized = TestVector2A.normalize();
-    assert(TestVector2ANormalized.getX() == 0.4f);
-    assert(TestVector2ANormalized.getY() == 0.8f);
+    float   TestVector2ALength = TestVector2A.length();
+    float ExpectedX = 4.0f / TestVector2ALength;
+    float ExpectedY = 8.0f / TestVector2ALength;
+    const float epsilion = 1e-5;
+    assert(fabs(TestVector2ANormalized.getX() - ExpectedX) < epsilion);
+    assert(fabs(TestVector2ANormalized.getY() - ExpectedY) < epsilion);
 }
 
 typedef ARRAY(TestCaseVector2) TestCases;
@@ -129,8 +132,10 @@ int main(void)
     array_append(TestCaseVector2, &Tests, TestCaseVector2("TestVector2GetY", TestVector2GetY));
     array_append(TestCaseVector2, &Tests, TestCaseVector2("TestVector2Add",  TestVector2Add));
     array_append(TestCaseVector2, &Tests, TestCaseVector2("TestVector2Sub",  TestVector2Sub));
-    array_append(TestCaseVector2, &Tests, TestCaseVector2("TestVectorMult",  TestVectorMult));
+    array_append(TestCaseVector2, &Tests, TestCaseVector2("TestVector2Mult",  TestVector2Mult));
     array_append(TestCaseVector2, &Tests, TestCaseVector2("TestVectorScale", TestVectorScale));
+    array_append(TestCaseVector2, &Tests, TestCaseVector2("TestVector2Length", TestVector2Length));
+    array_append(TestCaseVector2, &Tests, TestCaseVector2("TestVector2Normalize", TestVector2Normalize));
 
     RunAllTestCases(&Tests);
     return 0;

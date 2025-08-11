@@ -40,12 +40,13 @@ float Vector2::operator*(const Vector2& other) const
 }
 
 // NOTE: returns the Magnitude of a Vector
-float Vector2::length()
+float Vector2::length() const
 {
     return sqrtf((x*x) + (y*y));
 }
 
-Vector2 Vector2::normalize() {
+Vector2 Vector2::normalize() const
+{
     float mag = length();
     if (mag == 0.0f) return Vector2(0.0f, 0.0f);
     else return Vector2(getX()/mag, getY()/mag);
@@ -110,13 +111,14 @@ Vector3 Vector3::operator*(float scalar) const
 }
 
 // Length of a vector
-float Vector3::length()
+float Vector3::length() const
 {
     return sqrtf(((getX()*getX()) + (getY()*getY()) + (getZ()*getZ())));
 }
 
 // Function that Normalizes a 3D Vector
-Vector3 v3_normalize() {
+Vector3 Vector3::normalize() const
+{
     float mag = length();
     if (mag == 0.0f) return Vector3(0.0f, 0.0f, 0.0f);
     else return Vector3(getX()/mag, getY()/mag, getZ()/mag);
