@@ -51,57 +51,76 @@ Vector2 Vector2::normalize() {
     else return Vector2(getX()/mag, getY()/mag);
 }
 
-// // NOTE: Vector3 Implementation
-// Vector3 v3_init(float x, float y, float z)
-// {
-//     return (Vector3){x, y, z};
-// }
+// NOTE: Vector3 Implementation
+Vector3::Vector3(float x, float y, float z):
+    x(x), y(y), z(z) {}
 
-// void v3_print(const Vector3 *self)
-// {
-//     printf("Vector3: [%.2f, %.2f, %.2f]\n", self->x, self->y, self->z);
-// }
+float Vector3::getX() const
+{
+    return x;
+}
 
-// Vector3 v3_add(Vector3 a, Vector3 b) {
-//     return v3_init(a.x + b.x, a.y + b.y, a.z + b.z);
-// }
+float Vector3::getY() const
+{
+    return y;
+}
 
-// // Function that Subtracts Two Vector
-// Vector3 v3_sub(Vector3 a, Vector3 b) {
-//     return v3_init(a.x-b.x, a.y-b.y, a.z-b.z);
-// }
+float Vector3::getZ() const
+{
+    return z;
+}
 
-// // Function that returns the Dot Product of two Vectors -> (a float)
-// float v3_dot(Vector3 a, Vector3 b) {
-//     return (a.x*b.x) + (a.y*b.y) + (a.z*b.z);
-// }
+void Vector3::print() const
+{
+    printf("Vector3: [%.2f, %.2f, %.2f]\n", getX(), getY(), getZ());
+}
 
-// // Function that Returns A Cross Product of two Vectors
-// Vector3 v3_cross(Vector3 a, Vector3 b) {
-//     float cross_x = a.y * b.z - a.z * b.y;
-//     float cross_y = a.z * b.x - a.x * b.z;
-//     float cross_z = a.x * b.y - a.y * b.x;
+Vector3 Vector3::operator+(const Vector3& other) const
+{
 
-//     return v3_init(cross_x, cross_y, cross_z);
-// }
+    return Vector3(getX() + other.getX(), getY() + other.getY(), getZ() + other.getZ());
+}
 
-// // Scale A 3D Vector by a value
-// Vector3 v3_scale(Vector3 a, float value) {
-//     return v3_init(a.x*value, a.y*value, a.z*value);
-// }
+Vector3 Vector3::operator-(const Vector3& other) const
+{
 
-// // Length of a vector
-// float v3_length(Vector3 a)
-// {
-//     return sqrtf(((a.x*a.x)+(a.y*a.y)+(a.z*a.z)));
-// }
+    return Vector3(getX() - other.getX(), getY() - other.getY(), getZ() - other.getZ());
+}
 
-// // Function that Normalizes a 3D Vector
-// Vector3 v3_normalize(Vector3 a) {
-//     float mag = v3_length(a);
-//     if (mag == 0.0f) return v3_init(0.0f, 0.0f, 0.0f);
-//     else return v3_init(a.x/mag, a.y/mag, a.z/mag);
-// }
+// Function that returns the Dot Product of two Vectors -> (a float)
+float Vector3::operator*(const Vector3& other) const
+{
+    return (getX()*other.getX()) + (getY()*other.getY()) + (getZ()*other.getZ());
+}
+
+// Function that Returns A Cross Product of two Vectors
+Vector3 Vector3::cross(const Vector3& other) const
+{
+    float cross_x = getY() * other.getZ() - getZ() * other.getY();
+    float cross_y = getZ() * other.getX() - getX() * other.getZ();
+    float cross_z = getX() * other.getY() - getY() * other.getX();
+
+    return Vector3(cross_x, cross_y, cross_z);
+}
+
+// Scale A 3D Vector by a scalar
+Vector3 Vector3::operator*(float scalar) const
+{
+    return Vector3(getX()*scalar, getY()*scalar, getZ()*scalar);
+}
+
+// Length of a vector
+float Vector3::length()
+{
+    return sqrtf(((getX()*getX()) + (getY()*getY()) + (getZ()*getZ())));
+}
+
+// Function that Normalizes a 3D Vector
+Vector3 v3_normalize() {
+    float mag = length();
+    if (mag == 0.0f) return Vector3(0.0f, 0.0f, 0.0f);
+    else return Vector3(getX()/mag, getY()/mag, getZ()/mag);
+}
 
 // // NOTE: Vector4 Implementation
 

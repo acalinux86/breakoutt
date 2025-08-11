@@ -30,30 +30,34 @@ private:
 };
 
 
-// // Vector3
+// Vector3
 
-// // NOTE: VECTOR3 STRUCTURE
-// struct Vector3 {
-// public:
-//     // NOTE: VECTOR3 PROTOTYPES
-//     Vector3 v3_init(float x, float y, float z);
-//     void v3_print(const Vector3 *self);
+// NOTE: VECTOR3 STRUCTURE
+struct Vector3 {
+public:
+    // NOTE: VECTOR3 PROTOTYPES
+    Vector3(float x, float y, float z);
+    void print() const;
 
-//     Vector3 operator+(const Vector3& other);
-//     Vector3 operator-(Vector3 a, Vector3 b) const;
+    float getX() const;
+    float getY() const;
+    float getZ() const;
 
-//     Vector3 operator*(Vector3 a, float value);
-//     Vector3 operator*(Vector3 a, Vector3 b);
-//     float   operator*(Vector3 a, Vector3 b);
+    Vector3 operator+(const Vector3& other) const;
+    Vector3 operator-(const Vector3& other) const;
 
-//     float v3_length(Vector3 a);
-//     Vector3 v3_normalize(Vector3 a);
+    Vector3 cross(const Vector3& other) const;
+    Vector3 operator*(float scalar) const;
+    float   operator*(const Vector3& other) const;
 
-// private:
-//     float x;
-//     float y;
-//     float z;
-// };
+    float length();
+    Vector3 normalize();
+
+private:
+    float x;
+    float y;
+    float z;
+};
 
 // // Vector4
 
