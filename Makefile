@@ -4,7 +4,7 @@ LDFLAGS = -lm
 .PHONY: clean all
 
 all: testvector2 testvector3 breakoutt
-run: run_breakoutt run_testvector3 run_testvector2
+run: run_breakoutt run_testvector2 run_testvector3 run_testvector4 
 
 build:
 	mkdir -p build/
@@ -32,6 +32,12 @@ build/testvector3: Test/TestVector3.cpp build/math_util.o | build
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 run_testvector3:
 	./build/testvector3
+
+testvector4: build/testvector4
+build/testvector4: Test/TestVector4.cpp build/math_util.o | build
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+run_testvector4:
+	./build/testvector4
 
 clean:
 	rm -rf build/

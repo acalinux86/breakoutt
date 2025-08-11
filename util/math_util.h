@@ -6,6 +6,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdint.h>
+#include <assert.h>
 
 // Vector2
 struct Vector2 {
@@ -59,36 +60,52 @@ private:
     float z;
 };
 
-// // Vector4
+// Vector4
+enum class Vector4Type {
+    Point, // w = 0
+    Direction // w = 1
+};
 
-// // NOTE: VECTOR4 STRUCTURE
-// typedef struct {
-//     float x;
-//     float y;
-//     float z;
-//     float w;
-// } Vector4;
+// NOTE: VECTOR4 STRUCTURE
+struct Vector4 {
+public:
+    Vector4(float x, float y, float z, Vector4Type type);
+    Vector4(float x, float y, float z, float w);
+    void print() const;
 
+    float getX() const;
+    float getY() const;
+    float getZ() const;
+    float getW() const;
+    Vector4Type getType() const;
 
-// // NOTE: VECTOR4 PROTOTYPES
-// Vector4 v4_init(float x, float y, float z, float w);
-// Vector4 v4_point(float x, float y, float z);
-// Vector4 v4_direction(float x, float y, float z);
+    Vector4 operator+(const Vector4& other) const;
+    Vector4 operator-(const Vector4& other) const;
 
-// void v4_print(const Vector4 *self, const char *name);
-// #define V4_PRINT(self) v4_print(&self, #self)
+    Vector4 operator*(float value) const;
+    float operator*(const Vector4& other) const;
+    Vector4 cross(const Vector4& other) const;
 
-// Vector4 v4_add(Vector4 a, Vector4 b);
-// Vector4 v4_sub(Vector4 a, Vector4 b);
+    bool operator==(const Vector4& other) const;
+    bool operator!=(const Vector4& other) const;
 
-// Vector4 v4_scale(Vector4 a, float value);
-// Vector4 v4_cross(Vector4 a, Vector4 b);
-// float v4_dot(Vector4 a, Vector4 b);
+    float length() const;
+    Vector4 normalize() const;
+    Vector4 perspective_divide() const;
+private:
+    float x;
+    float y;
+    float z;
+    Vector4Type type;
+    float w;
+};
 
-// float v4_length(Vector4 a);
-// Vector4 v4_normalize(Vector4 a);
-// Vector4 v4_perspective_divide(Vector4 a);
-// bool v4_equals(Vector4 a, Vector4 b);
+#define ASSERT_DIRECTION(vec) \
+    assert(((vec).getType() == Vector4Type::Direction) && "Expected a direction")
+
+#define ASSERT_POINT(vec) \
+    assert(((vec).getType() == Vector4Type::Point) && "Expected a point")
+
 
 // // Matrix4
 // #define MAT4_ROWS 4
