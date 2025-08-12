@@ -443,6 +443,20 @@ Matrix4 Matrix4::rotate_z(float degrees)
     return *this;
 }
 
+bool Matrix4::operator==(const Matrix4& other) const
+{
+    for (uint32_t i = 0; i < MAT4_ROWS; ++i) {
+        for (uint32_t j = 0; j < MAT4_COLS; ++j) {
+            if (!floatEqual(rows[i][j], other.rows[i][j])) return false;
+        }
+    }
+    return true;
+}
+bool Matrix4::operator!=(const Matrix4& other) const
+{
+    return !(*this == other);
+}
+
 
 // Vector4 v4_from_v3(Vector3 vec3)
 // {

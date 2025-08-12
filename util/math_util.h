@@ -114,6 +114,8 @@ public:
     Matrix4 rotate_x(float degrees);
     Matrix4 rotate_y(float degrees);
     Matrix4 rotate_z(float degrees);
+    bool operator==(const Matrix4& other) const;
+    bool operator!=(const Matrix4& other) const;
 private:
     float rows[MAT4_ROWS][MAT4_COLS];
 };
