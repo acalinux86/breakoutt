@@ -1,12 +1,12 @@
 #ifndef MATH_UTIL_H
 #define MATH_UTIL_H
 
-#include <stdio.h>
-#include <stdbool.h>
-#include <math.h>
-#include <string.h>
-#include <stdint.h>
-#include <assert.h>
+#include <cstdio>
+#include <cstdbool>
+#include <cmath>
+#include <cstring>
+#include <cstdint>
+#include <cassert>
 
 // Vector2
 struct Vector2 {

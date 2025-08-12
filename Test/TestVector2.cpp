@@ -1,8 +1,6 @@
 #include "../util/math_util.h"
 #include "../util/array.h"
 
-#include <assert.h>
-
 struct TestCaseVector2 {
 public:
     TestCaseVector2(const char *Name, void (*Fn)(void));

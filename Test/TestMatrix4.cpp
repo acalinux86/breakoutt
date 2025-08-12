@@ -1,8 +1,6 @@
 #include "../util/math_util.h"
 #include "../util/array.h"
 
-#include <assert.h>
-
 struct TestCaseMatrix4 {
 public:
     TestCaseMatrix4(const char *Name, void (*Fn)(void));
