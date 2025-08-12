@@ -1,4 +1,4 @@
-#include "./math_util.h"
+#include "./math_util.hpp"
 
 // NOTE: VECTOR2 Implementation
 Vector2::Vector2(float x, float y) : x(x), y(y) {}

@@ -1,4 +1,4 @@
-#include "../util/math_util.h"
+#include "../util/math_util.hpp"
 #include "../util/array.h"
 
 struct TestCaseMatrix4 {

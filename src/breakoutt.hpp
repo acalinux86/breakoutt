@@ -1,7 +1,7 @@
 #ifndef BREAKOUTT_H_
 #define BREAKOUTT_H_
 
-#include "../util/math_util.h"
+#include "../util/math_util.hpp"
 
 struct Ball {
 public:
