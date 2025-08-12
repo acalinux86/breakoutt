@@ -400,11 +400,11 @@ static inline float degrees_to_radians(float degrees)
 
 Matrix4 Matrix4::rotate_x(float degrees)
 {
-    float c = std::cosf(degrees_to_radians(degrees));
-    float s = std::sinf(degrees_to_radians(degrees));
+    float c = cosf(degrees_to_radians(degrees));
+    float s = sinf(degrees_to_radians(degrees));
 
-    if (std::fabsf(c) < EPSILION) c = 0.0f;
-    if (std::fabsf(s) < EPSILION) s = 0.0f;
+    if (fabsf(c) < EPSILION) c = 0.0f;
+    if (fabsf(s) < EPSILION) s = 0.0f;
     this->identity();
     this->setElement(1, 1, c);
     this->setElement(1, 2, -s);
@@ -415,11 +415,11 @@ Matrix4 Matrix4::rotate_x(float degrees)
 
 Matrix4 Matrix4::rotate_y(float degrees)
 {
-    float c = std::cosf(degrees_to_radians(degrees));
-    float s = std::sinf(degrees_to_radians(degrees));
+    float c = cosf(degrees_to_radians(degrees));
+    float s = sinf(degrees_to_radians(degrees));
 
-    if (std::fabsf(c) < EPSILION) c = 0.0f;
-    if (std::fabsf(s) < EPSILION) s = 0.0f;
+    if (fabsf(c) < EPSILION) c = 0.0f;
+    if (fabsf(s) < EPSILION) s = 0.0f;
     this->identity();
     this->setElement(0, 0, c);
     this->setElement(0, 2, s);
@@ -430,11 +430,11 @@ Matrix4 Matrix4::rotate_y(float degrees)
 
 Matrix4 Matrix4::rotate_z(float degrees)
 {
-    float c = std::cosf(degrees_to_radians(degrees));
-    float s = std::sinf(degrees_to_radians(degrees));
+    float c = cosf(degrees_to_radians(degrees));
+    float s = sinf(degrees_to_radians(degrees));
 
-    if (std::fabsf(c) < EPSILION) c = 0.0f;
-    if (std::fabsf(s) < EPSILION) s = 0.0f;
+    if (fabsf(c) < EPSILION) c = 0.0f;
+    if (fabsf(s) < EPSILION) s = 0.0f;
     this->identity();
     this->setElement(0, 0, c);
     this->setElement(0, 1, -s);
