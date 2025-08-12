@@ -25,12 +25,12 @@ void TestCaseMatrix4::RunTestCase()
 // Matrix4 operator+(const Matrix4& other) const;
 // Matrix4 operator-(const Matrix4& other) const;
 // Matrix4 operator*(const Matrix4& other) const;
-
-// Remaining:
 // Matrix4 value(float value) const;
 // Matrix4 identity() const;
 // Matrix4 transpose() const;
 // Matrix4 copy() const;
+
+// Remaining:
 // Matrix4 rotate_x(float degrees) const;
 // Matrix4 rotate_y(float degrees) const;
 // Matrix4 rotate_z(float degrees) const;
@@ -43,8 +43,7 @@ void TestMatrix4GetElement(void)
         assert(element == 0.00f);
     }
     {
-        Matrix4 TestMatrix4A = {};
-        TestMatrix4A = TestMatrix4A.identity();
+        Matrix4 TestMatrix4A = Matrix4().identity();
         float TestA = TestMatrix4A.getElement(3, 3);
         float TestB = TestMatrix4A.getElement(3, 2);
         assert(TestA == 1.00f);
@@ -61,8 +60,7 @@ void TestMatrix4SetElement(void)
         assert(element == 10.56f);
     }
     {
-        Matrix4 TestMatrix4A = {};
-        TestMatrix4A = TestMatrix4A.identity().setElement(3, 3, 100.0f).setElement(3, 2, 70.0f);
+        Matrix4 TestMatrix4A = Matrix4().identity().setElement(3, 3, 100.0f).setElement(3, 2, 70.0f);
         float TestA = TestMatrix4A.getElement(3, 3);
         float TestB = TestMatrix4A.getElement(3, 2);
         assert(TestA == 100.00f);
@@ -73,11 +71,8 @@ void TestMatrix4SetElement(void)
 void TestMatrix4Add(void)
 {
     {
-        Matrix4 TestMatrix4A = {};
-        Matrix4 TestMatrix4B = {};
-
-        TestMatrix4A = TestMatrix4A.identity();
-        TestMatrix4B = TestMatrix4B.identity();
+        Matrix4 TestMatrix4A = Matrix4().identity();
+        Matrix4 TestMatrix4B = Matrix4().identity();
 
         Matrix4 TestMatrixC = TestMatrix4A + TestMatrix4B;
         float TestLast = TestMatrixC.getElement(3, 3);
@@ -86,11 +81,8 @@ void TestMatrix4Add(void)
         assert(TestFirst == 2.00f);
     }
     {
-        Matrix4 TestMatrix4A = {};
-        Matrix4 TestMatrix4B = {};
-
-        TestMatrix4A = TestMatrix4A.identity().setElement(3, 2, 50.0f).setElement(1, 3, 53.0f);
-        TestMatrix4B = TestMatrix4B.identity().setElement(3, 2, 100.0f).setElement(1, 3, 14.0f);
+        Matrix4 TestMatrix4A = Matrix4().identity().setElement(3, 2, 50.0f).setElement(1, 3, 53.0f);
+        Matrix4 TestMatrix4B = Matrix4().identity().setElement(3, 2, 100.0f).setElement(1, 3, 14.0f);
 
         Matrix4 TestMatrix4C = TestMatrix4A + TestMatrix4B;
         float TestA = TestMatrix4C.getElement(3, 2);
@@ -105,11 +97,8 @@ void TestMatrix4Add(void)
 void TestMatrix4Sub(void)
 {
     {
-        Matrix4 TestMatrix4A = {};
-        Matrix4 TestMatrix4B = {};
-
-        TestMatrix4A = TestMatrix4A.identity();
-        TestMatrix4B = TestMatrix4B.identity();
+        Matrix4 TestMatrix4A = Matrix4().identity();
+        Matrix4 TestMatrix4B = Matrix4().identity();
 
         Matrix4 TestMatrixC = TestMatrix4A - TestMatrix4B;
         float TestLast = TestMatrixC.getElement(3, 3);
@@ -118,11 +107,8 @@ void TestMatrix4Sub(void)
         assert(TestFirst == 0.00f);
     }
     {
-        Matrix4 TestMatrix4A = {};
-        Matrix4 TestMatrix4B = {};
-
-        TestMatrix4A = TestMatrix4A.identity().setElement(3, 2, 50.0f).setElement(1, 3, 53.0f);
-        TestMatrix4B = TestMatrix4B.identity().setElement(1, 3, 14.0f).setElement(3, 2, 100.0f);;
+        Matrix4 TestMatrix4A = Matrix4().identity().setElement(3, 2, 50.0f).setElement(1, 3, 53.0f);
+        Matrix4 TestMatrix4B = Matrix4().identity().setElement(1, 3, 14.0f).setElement(3, 2, 100.0f);;
 
         Matrix4 TestMatrix4C = TestMatrix4A - TestMatrix4B;
         float TestA = TestMatrix4C.getElement(3, 2);
@@ -192,6 +178,55 @@ void TestMatrix4Mult(void)
     }
 }
 
+void TestMatrix4Value(void)
+{
+    Matrix4 TestMatrix4A = Matrix4().value(10.0f);
+    float TestOne = TestMatrix4A.getElement(0, 0);
+    float TestTwo = TestMatrix4A.getElement(1, 1);
+    float TestThree = TestMatrix4A.getElement(2, 2);
+    float TestFour = TestMatrix4A.getElement(3, 3);
+    assert(floatEqual(TestOne, 10.0f));
+    assert(floatEqual(TestTwo, 10.0f));
+    assert(floatEqual(TestThree, 10.0f));
+    assert(floatEqual(TestFour, 1.0f));
+}
+
+void TestMatrix4Identity(void)
+{
+    Matrix4 Identity = Matrix4().identity();
+    float TestOne = Identity.getElement(0, 0);
+    float TestTwo = Identity.getElement(1, 1);
+    float TestThree = Identity.getElement(2, 2);
+    float TestFour = Identity.getElement(3, 3);
+    assert(floatEqual(TestOne, 1.0f));
+    assert(floatEqual(TestTwo, 1.0f));
+    assert(floatEqual(TestThree, 1.0f));
+    assert(floatEqual(TestFour, 1.0f));
+}
+
+void TestMatrixTranspose(void)
+{
+    // .value() places a specified value in (0,0) (1,1) (2,2) except (3,3)
+    Matrix4 TestMatrixA = Matrix4().value(10.0f);
+    // Transpose transposes it ;)
+    TestMatrixA = TestMatrixA.setElement(1, 0, 5.0f).setElement(2, 0, 6.0f).setElement(3, 0, 7.0f).transpose();
+    float TestOne = TestMatrixA.getElement(0, 0);
+    float TestTwo = TestMatrixA.getElement(0, 1);
+    float TestThree = TestMatrixA.getElement(0, 2);
+    float TestFour = TestMatrixA.getElement(0, 3);
+    assert(floatEqual(TestOne, 10.0f));
+    assert(floatEqual(TestTwo, 5.0f));
+    assert(floatEqual(TestThree, 6.0f));
+    assert(floatEqual(TestFour, 7.0f));
+}
+
+void TestMatrix4Copy(void)
+{
+    Matrix4 Original = Matrix4().value(10.0f);
+    Matrix4 Copy = Original.copy();
+    assert(Original == Copy);
+}
+
 typedef ARRAY(TestCaseMatrix4) TestCases;
 void RunAllTestCases(const TestCases *Tests)
 {
@@ -211,6 +246,10 @@ int main(void)
     array_append(TestCaseMatrix4, &Tests, TestCaseMatrix4("TestMatrix4Add", TestMatrix4Add));
     array_append(TestCaseMatrix4, &Tests, TestCaseMatrix4("TestMatrix4Sub", TestMatrix4Sub));
     array_append(TestCaseMatrix4, &Tests, TestCaseMatrix4("TestMatrix4Mult", TestMatrix4Mult));
+    array_append(TestCaseMatrix4, &Tests, TestCaseMatrix4("TestMatrix4Value", TestMatrix4Value));
+    array_append(TestCaseMatrix4, &Tests, TestCaseMatrix4("TestMatrix4Identity", TestMatrix4Identity));
+    array_append(TestCaseMatrix4, &Tests, TestCaseMatrix4("TestMatrixTranspose", TestMatrixTranspose));
+    array_append(TestCaseMatrix4, &Tests, TestCaseMatrix4("TestMatrix4Copy", TestMatrix4Copy));
     RunAllTestCases(&Tests);
     return 0;
 }
