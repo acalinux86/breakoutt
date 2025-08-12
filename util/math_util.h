@@ -96,7 +96,7 @@ private:
 #define MAT4_ROWS 4
 #define MAT4_COLS 4
 #define PI 3.14593f
-#define EPSILON 1e-3f
+#define EPSILION 1e-3f
 
 struct Matrix4 {
 public:
@@ -126,5 +126,10 @@ private:
 // Matrix4 mv4_translate(Vector4 vec_4);
 // Vector3 to_screen_coords(Vector3 vec3, uint32_t screen_width, uint32_t screen_height);
 // Vector3 to_world_coords(Vector3 vec3, uint32_t screen_width, uint32_t screen_height);
+
+// Helper Functions
+static inline bool floatEqual(float a, float b) {
+    return std::fabs(a - b) <= EPSILION;
+}
 
 #endif // MATH_UTIL_H
