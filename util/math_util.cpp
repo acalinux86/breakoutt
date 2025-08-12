@@ -292,15 +292,15 @@ void Matrix4::print() const
 
 float Matrix4::getElement(uint32_t row, uint32_t col) const
 {
-    assert(((int)row >= 0 && (int)row < MAT4_ROWS) && "Row Out of Bounds");
-    assert(((int)col >= 0 && (int)col < MAT4_COLS) && "Col Out of Bounds");
+    assert(((int)row >= 0 && (int)row < MAT4_ROWS) && "Access of Out of Bounds Row");
+    assert(((int)col >= 0 && (int)col < MAT4_COLS) && "Access of Out of Bounds Col");
     return rows[row][col];
 }
 
 Matrix4 Matrix4::setElement(uint32_t row, uint32_t col, float element)
 {
-    assert(((int)row >= 0 && (int)row < MAT4_ROWS) && "Row Out of Bounds");
-    assert(((int)col >= 0 && (int)col < MAT4_COLS) && "Col Out of Bounds");
+    assert(((int)row >= 0 && (int)row < MAT4_ROWS) && "Access of Out of Bounds Row");
+    assert(((int)col >= 0 && (int)col < MAT4_COLS) && "Access of Out of Bounds Col");
     rows[row][col] = element;
     return *this;
 }
