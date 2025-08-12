@@ -129,7 +129,7 @@ private:
 
 // Helper Functions
 static inline bool floatEqual(float a, float b) {
-    return std::fabs(a - b) <= EPSILION;
+    return fabsf(a - b) <= EPSILION;
 }
 
 #endif // MATH_UTIL_H
