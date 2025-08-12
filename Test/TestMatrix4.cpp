@@ -198,7 +198,7 @@ void RunAllTestCases(const TestCases *Tests)
     for (uint32_t i = 0; i < Tests->count; ++i) {
         Tests->items[i].RunTestCase();
     }
-    printf("SUCESS: All %u Test cases Passed\n", Tests->count);
+    printf("SUCCESS: All %u Test cases Passed\n", Tests->count);
 }
 
 int main(void)

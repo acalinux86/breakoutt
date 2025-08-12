@@ -1,7 +1,7 @@
 #include "../util/math_util.h"
 #include "../util/array.h"
 
-#include <assert.h>
+#include <cassert>
 
 struct TestCaseVector3 {
 public:
@@ -27,9 +27,9 @@ void TestVector3Constructor(void)
     float y = 20.0f;
     float z = 30.0f;
     Vector3 Test(x, y, z);
-    assert(Test.getX() == 10.0f);
-    assert(Test.getY() == 20.0f);
-    assert(Test.getZ() == 30.0f);
+    assert(floatEqual(Test.getX(), 10.0f));
+    assert(floatEqual(Test.getY(), 20.0f));
+    assert(floatEqual(Test.getZ(), 30.0f));
 }
 
 void TestVector3GetX(void)
@@ -38,7 +38,7 @@ void TestVector3GetX(void)
     float y = 20.0f;
     float z = 30.0f;
     Vector3 Test(x, y, z);
-    assert(Test.getX() == 10.0f);
+    assert(floatEqual(Test.getX(), 10.0f));
 }
 
 void TestVector3GetY(void)
@@ -47,7 +47,7 @@ void TestVector3GetY(void)
     float y = 20.0f;
     float z = 30.0f;
     Vector3 Test(x, y, z);
-    assert(Test.getY() == 20.0f);
+    assert(floatEqual(Test.getY(), 20.0f));
 }
 
 void TestVector3GetZ(void)
@@ -56,7 +56,7 @@ void TestVector3GetZ(void)
     float y = 20.0f;
     float z = 30.0f;
     Vector3 Test(x, y, z);
-    assert(Test.getZ() == 30.0f);
+    assert(floatEqual(Test.getZ(), 30.0f));
 }
 
 void TestVector3Add(void)
@@ -69,10 +69,9 @@ void TestVector3Add(void)
     float y = TestVector3C.getY();
     float z = TestVector3C.getZ();
 
-    const float epsilion = 1e-5f;
-    assert(fabs(x - 31.10f) < epsilion);
-    assert(fabs(y - 51.10f) < epsilion);
-    assert(fabs(z - 71.10f) < epsilion);
+    assert(floatEqual(x , 31.10f));
+    assert(floatEqual(y , 51.10f));
+    assert(floatEqual(z , 71.10f));
 }
 
 void TestVector3Sub(void)
@@ -84,10 +83,9 @@ void TestVector3Sub(void)
     float x = TestVector3C.getX();
     float y = TestVector3C.getY();
     float z = TestVector3C.getZ();
-    const float epsilion = 1e-5f;
-    assert(fabs(x - -10.00f) < epsilion);
-    assert(fabs(y -  20.00f) < epsilion);
-    assert(fabs(z -  10.00f) < epsilion);
+    assert(floatEqual(x , -10.00f));
+    assert(floatEqual(y ,  20.00f));
+    assert(floatEqual(z ,  10.00f));
 }
 
 void TestVector3Mult(void)
@@ -97,7 +95,7 @@ void TestVector3Mult(void)
 
     float TestVector3C = TestVector3A * TestVector3B;
     float expected = (5.5f * 2.3f) + (6.57f * 7.98f) + (9.56f*10.87f);
-    assert(TestVector3C == expected);
+    assert(floatEqual(TestVector3C, expected));
 }
 
 void TestVectorScale(void)
@@ -108,37 +106,37 @@ void TestVectorScale(void)
     float x = 5.5f * 10.0f;
     float y = 6.57f * 10.0f;
     float z = 1.21f * 10.0f;
-    assert(TestVector3C.getX() == x);
-    assert(TestVector3C.getY() == y);
-    assert(TestVector3C.getZ() == z);
+    assert(floatEqual(TestVector3C.getX() , x));
+    assert(floatEqual(TestVector3C.getY() , y));
+    assert(floatEqual(TestVector3C.getZ() , z));
 }
 
 void TestVector3Cross(void)
 {
-    const float epsilion = 1e-4;
     // Test case 1: Basic orthogonal vectors
     Vector3 a(1.0f, 0.0f, 0.0f);
     Vector3 b(0.0f, 1.0f, 0.0f);
     Vector3 cross = a.cross(b);
-    assert(fabs(cross.getX() - 0.0f) < epsilion);
-    assert(fabs(cross.getY() - 0.0f) < epsilion);
-    assert(fabs(cross.getZ() - 1.0f) < epsilion);
+    assert(floatEqual(cross.getX() , 0.0f));
+    assert(floatEqual(cross.getY() , 0.0f));
+    assert(floatEqual(cross.getZ() , 1.0f));
 
     // Test case 2: Another simple case
     Vector3 c(2.0f, 3.0f, 4.0f);
     Vector3 d(5.0f, 6.0f, 7.0f);
     Vector3 cross2 = c.cross(d);
-    assert(fabs(cross2.getX() - (-3.0f)) < epsilion);  // 3*7 - 4*6 = -3
-    assert(fabs(cross2.getY() - 6.0f) < epsilion);     // 4*5 - 2*7 = 6
-    assert(fabs(cross2.getZ() - (-3.0f)) < epsilion);  // 2*6 - 3*5 = -3
+
+    assert(floatEqual(cross2.getX() , -3.0f));  // 3*7 , 4*6 = -3
+    assert(floatEqual(cross2.getY() , 6.0f));     // 4*5 , 2*7 = 6
+    assert(floatEqual(cross2.getZ() , -3.0f));  // 2*6 , 3*5 = -3
 
     // Test case 3: Cross product with itself should be zero
     Vector3 e(1.0f, 2.0f, 3.0f);
     Vector3 cross3 = e.cross(e);
 
-    assert(fabs(cross3.getX()) < epsilion);
-    assert(fabs(cross3.getY()) < epsilion);
-    assert(fabs(cross3.getZ()) < epsilion);
+    assert(floatEqual(cross3.getX(), 0.0f));
+    assert(floatEqual(cross3.getY(), 0.0f));
+    assert(floatEqual(cross3.getZ(), 0.0f));
 
     // Test case 4: Anti-commutative property (a × b = -b × a)
     Vector3 f(1.0f, 2.0f, 3.0f);
@@ -146,9 +144,9 @@ void TestVector3Cross(void)
     Vector3 cross_fg = f.cross(g);
     Vector3 cross_gf = g.cross(f);
 
-    assert(fabs(cross_fg.getX() + cross_gf.getX()) < epsilion);
-    assert(fabs(cross_fg.getY() + cross_gf.getY()) < epsilion);
-    assert(fabs(cross_fg.getZ() + cross_gf.getZ()) < epsilion);
+    assert(floatEqual(cross_fg.getX() , -cross_gf.getX()));
+    assert(floatEqual(cross_fg.getY() , -cross_gf.getY()));
+    assert(floatEqual(cross_fg.getZ() , -cross_gf.getZ()));
 }
 
 void TestVector3Length(void)
@@ -166,10 +164,9 @@ void TestVector3Normalize(void)
     float ExpectedX = 1.0f / TestVector3ALength;
     float ExpectedY = 4.0f / TestVector3ALength;
     float ExpectedZ = 8.0f / TestVector3ALength;
-    const float epsilion = 1e-5;
-    assert(fabs(TestVector3ANormalized.getX() - ExpectedX) < epsilion);
-    assert(fabs(TestVector3ANormalized.getY() - ExpectedY) < epsilion);
-    assert(fabs(TestVector3ANormalized.getZ() - ExpectedZ) < epsilion);
+    assert(floatEqual(TestVector3ANormalized.getX() , ExpectedX));
+    assert(floatEqual(TestVector3ANormalized.getY() , ExpectedY));
+    assert(floatEqual(TestVector3ANormalized.getZ() , ExpectedZ));
 }
 
 typedef ARRAY(TestCaseVector3) TestCases;
@@ -178,6 +175,7 @@ void RunAllTestCases(const TestCases *Tests)
     for (uint32_t i = 0; i < Tests->count; ++i) {
         Tests->items[i].RunTestCase();
     }
+    printf("SUCCESS: All %u Test cases Passed\n", Tests->count);
 }
 
 int main(void)
