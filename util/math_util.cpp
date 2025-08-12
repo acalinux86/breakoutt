@@ -263,179 +263,185 @@ bool Vector4::operator!=(const Vector4& other) const
     return !(*this == other);
 }
 
-// // Matrix4 Implementation
-// static inline void safe_memcpy(Matrix4 *dest, Matrix4 *src)
-// {
-//     if (src && dest) memcpy(dest, src, sizeof(Matrix4));
-// }
+// Matrix4 Implementation
+static inline void safe_memcpy(Matrix4 *dest, Matrix4 *src)
+{
+    if (src && dest) memcpy(dest, src, sizeof(Matrix4));
+}
 
-// void mat4_print(const Matrix4 *self, const char *name)
-// {
-//     printf("Matrix4 (%s): {\n", name);
-//     for (uint32_t i = 0; i < MAT4_ROWS; ++i) {
-//         printf("    [ ");
-//         for (uint32_t j = 0; j < MAT4_COLS; ++j) {
-//             printf("%3.2f ", self->rows[i][j]);
-//         }
-//         printf("]\n");
-//     }
-//     printf("}\n");
-// }
+void Matrix4::print() const
+{
+    printf("Matrix4: {\n");
+    for (uint32_t i = 0; i < MAT4_ROWS; ++i) {
+        printf("    [ ");
+        for (uint32_t j = 0; j < MAT4_COLS; ++j) {
+            printf("%3.2f ", rows[i][j]);
+        }
+        printf("]\n");
+    }
+    printf("}\n");
+}
 
-// Matrix4 mat4_add(Matrix4 a, Matrix4 b)
-// {
-//     Matrix4 result = {0};
-//     for (uint32_t i = 0; i < MAT4_ROWS; ++i) {
-//         for (uint32_t j = 0; j < MAT4_COLS; ++j) {
-//             result.rows[i][j] = a.rows[i][j] + b.rows[i][j];
-//         }
-//     }
-//     return result;
-// }
+float Matrix4::getElement(uint32_t row, uint32_t col) const
+{
+    assert(((int)row >= 0 && (int)row < MAT4_ROWS) && "Row Out of Bounds");
+    assert(((int)col >= 0 && (int)col < MAT4_COLS) && "Col Out of Bounds");
+    return rows[row][col];
+}
 
-// Matrix4 mat4_sub(Matrix4 a, Matrix4 b)
-// {
-//     Matrix4 result = {0};
-//     for (uint32_t i = 0; i < MAT4_ROWS; ++i) {
-//         for (uint32_t j = 0; j < MAT4_COLS; ++j) {
-//             result.rows[i][j] = a.rows[i][j] - b.rows[i][j];
-//         }
-//     }
-//     return result;
-// }
+Matrix4 Matrix4::setElement(uint32_t row, uint32_t col, float element)
+{
+    assert(((int)row >= 0 && (int)row < MAT4_ROWS) && "Row Out of Bounds");
+    assert(((int)col >= 0 && (int)col < MAT4_COLS) && "Col Out of Bounds");
+    rows[row][col] = element;
+    return *this;
+}
 
-// Matrix4 mat4_mult(Matrix4 a, Matrix4 b)
-// {
-//     // a b    e f   ae + bg   af + bh
-//     //      X
-//     // c d    g h   ce + dg   cf + dh
-//     //
+Matrix4 Matrix4::operator+(const Matrix4& other) const
+{
+    Matrix4 result = {};
+    for (uint32_t i = 0; i < MAT4_ROWS; ++i) {
+        for (uint32_t j = 0; j < MAT4_COLS; ++j) {
+            result.rows[i][j] = rows[i][j] + other.rows[i][j];
+        }
+    }
+    return result;
+}
 
-//     Matrix4 result = {0};
-//     for (uint32_t i = 0; i < MAT4_ROWS; ++i) {
-//         for (uint32_t j = 0; j < MAT4_COLS; ++j) {
-//             float c = 0.0f;
-//             for (uint32_t k = 0; k < MAT4_COLS; ++k) {
-//                 c += a.rows[i][k] * b.rows[k][j];
-//             }
-//             result.rows[i][j] = c;
-//         }
-//     }
-//     return result;
-// }
+Matrix4 Matrix4::operator-(const Matrix4& other) const
+{
+    Matrix4 result = {};
+    for (uint32_t i = 0; i < MAT4_ROWS; ++i) {
+        for (uint32_t j = 0; j < MAT4_COLS; ++j) {
+            result.rows[i][j] = rows[i][j] - other.rows[i][j];
+        }
+    }
+    return result;
+}
 
-// Matrix4 mat4_value(float value)
-// {
-//     /*Matrix4 result = {
-//         .rows = {
-//                 {value, 0.0f,  0.0f,  0.0f},
-//                 {0.0f,  value, 0.0f,  0.0f},
-//                 {0.0f,  0.0f,  value, 0.0f},
-//                 {0.0f,  0.0f,  0.0f,  1.0f}
-//         }
-//     };*/
+Matrix4 Matrix4::operator*(const Matrix4& other) const
+{
+    // a b    e f   ae + bg   af + bh
+    //      X
+    // c d    g h   ce + dg   cf + dh
+    //
 
-//     Matrix4 result = {0};
-//     for (uint32_t i = 0; i < MAT4_ROWS; ++i) {
-//         for (uint32_t j = 0; j < MAT4_COLS; ++j) {
-//             result.rows[i][j] = (i == j) ? value : 0.0f;
-//         }
-//     }
+    Matrix4 result = {};
+    for (uint32_t i = 0; i < MAT4_ROWS; ++i) {
+        for (uint32_t j = 0; j < MAT4_COLS; ++j) {
+            float c = 0.0f;
+            for (uint32_t k = 0; k < MAT4_COLS; ++k) {
+                c += rows[i][k] * other.rows[k][j];
+            }
+            result.rows[i][j] = c;
+        }
+    }
+    return result;
+}
 
-//     result.rows[MAT4_ROWS - 1][MAT4_COLS - 1] = 1.0f;
-//     return result;
-// }
+Matrix4 Matrix4::value(float value) const
+{
+    /*Matrix4 result = {
+        .rows = {
+                {value, 0.0f,  0.0f,  0.0f},
+                {0.0f,  value, 0.0f,  0.0f},
+                {0.0f,  0.0f,  value, 0.0f},
+                {0.0f,  0.0f,  0.0f,  1.0f}
+        }
+    };*/
 
-// Matrix4 mat4_identity()
-// {
-//     return mat4_value(1.0f);
-// }
+    Matrix4 result = {};
+    for (uint32_t i = 0; i < MAT4_ROWS; ++i) {
+        for (uint32_t j = 0; j < MAT4_COLS; ++j) {
+            result.rows[i][j] = (i == j) ? value : 0.0f;
+        }
+    }
 
-// Matrix4 mat4_transpose(Matrix4 mat4)
-// {
-//     /* Matrix4 result =  {
-//         .rows = {
-//                 {mat4.rows[0][0], mat4.rows[1][0], mat4.rows[2][0], mat4.rows[3][0]},
-//                 {mat4.rows[0][1], mat4.rows[1][1], mat4.rows[2][1], mat4.rows[3][1]},
-//                 {mat4.rows[0][2], mat4.rows[1][2], mat4.rows[2][2], mat4.rows[3][2]},
-//                 {mat4.rows[0][3], mat4.rows[1][3], mat4.rows[2][3], mat4.rows[3][3]}
-//         }
-//     }; */
+    result.rows[MAT4_ROWS - 1][MAT4_COLS - 1] = 1.0f;
+    return result;
+}
 
-//     Matrix4 result = {0};
-//     for (uint32_t i = 0; i < MAT4_ROWS; ++i) {
-//         for (uint32_t j = 0; j < MAT4_COLS; ++j) {
-//             result.rows[i][j] = mat4.rows[j][i];
-//         }
-//     }
-//     return result;
-// }
+Matrix4 Matrix4::identity() const
+{
+    return value(1.0f);
+}
 
-// Matrix4 mat4_copy(Matrix4 mat4)
-// {
-//     Matrix4 result = {0};
-//     safe_memcpy(&result, &mat4);
-//     return result;
-// }
+Matrix4 Matrix4::transpose() const
+{
+    /* Matrix4 result =  {
+        .rows = {
+                {rows[0][0], rows[1][0], rows[2][0], rows[3][0]},
+                {rows[0][1], rows[1][1], rows[2][1], rows[3][1]},
+                {rows[0][2], rows[1][2], rows[2][2], rows[3][2]},
+                {rows[0][3], rows[1][3], rows[2][3], rows[3][3]}
+        }
+    }; */
 
-// static inline float degrees_to_radians(float degrees)
-// {
-//     return degrees * (PI / 180.0f);
-// }
+    Matrix4 result = {};
+    for (uint32_t i = 0; i < MAT4_ROWS; ++i) {
+        for (uint32_t j = 0; j < MAT4_COLS; ++j) {
+            result.rows[i][j] = rows[j][i];
+        }
+    }
+    return result;
+}
 
-// Matrix4 mat4_rotate_x(float degrees)
-// {
-//     float c = cosf(degrees_to_radians(degrees));
-//     float s = sinf(degrees_to_radians(degrees));
+Matrix4 Matrix4::copy()
+{
+    Matrix4 result = {};
+    safe_memcpy(&result, this);
+    return result;
+}
 
-//     if (fabsf(c) < EPSILON) c = 0.0f;
-//     if (fabsf(s) < EPSILON) s = 0.0f;
-//     Matrix4 result =  {
-//         .rows = {
-//                 {1.0f, 0.0f, 0.0f, 0.0f},
-//                 {0.0f,    c,   -s, 0.0f},
-//                 {0.0f,    s,    c, 0.0f},
-//                 {0.0f, 0.0f, 0.0f, 1.0f}
-//         }
-//     };
-//     return result;
-// }
+static inline float degrees_to_radians(float degrees)
+{
+    return degrees * (PI / 180.0f);
+}
 
-// Matrix4 mat4_rotate_y(float degrees)
-// {
-//     float c = cosf(degrees_to_radians(degrees));
-//     float s = sinf(degrees_to_radians(degrees));
+Matrix4 Matrix4::rotate_x(float degrees)
+{
+    float c = std::cosf(degrees_to_radians(degrees));
+    float s = std::sinf(degrees_to_radians(degrees));
 
-//     if (fabsf(c) < EPSILON) c = 0.0f;
-//     if (fabsf(s) < EPSILON) s = 0.0f;
-//     Matrix4 result =  {
-//         .rows = {
-//                 {   c, 0.0f,    s, 0.0f},
-//                 {0.0f, 1.0f, 0.0f, 0.0f},
-//                 {  -s, 0.0f,    c, 0.0f},
-//                 {0.0f, 0.0f, 0.0f, 1.0f}
-//         }
-//     };
-//     return result;
-// }
+    if (std::fabsf(c) < EPSILON) c = 0.0f;
+    if (std::fabsf(s) < EPSILON) s = 0.0f;
+    this->identity();
+    this->setElement(1, 1, c);
+    this->setElement(1, 2, -s);
+    this->setElement(2, 1, s);
+    this->setElement(2, 2, c);
+    return *this;
+}
 
-// Matrix4 mat4_rotate_z(float degrees)
-// {
-//     float c = cosf(degrees_to_radians(degrees));
-//     float s = sinf(degrees_to_radians(degrees));
+Matrix4 Matrix4::rotate_y(float degrees)
+{
+    float c = std::cosf(degrees_to_radians(degrees));
+    float s = std::sinf(degrees_to_radians(degrees));
 
-//     if (fabsf(c) < EPSILON) c = 0.0f;
-//     if (fabsf(s) < EPSILON) s = 0.0f;
-//     Matrix4 result =  {
-//         .rows = {
-//                 {   c,   -s, 0.0f, 0.0f},
-//                 {   s,    c, 0.0f, 0.0f},
-//                 {0.0f, 0.0f, 1.0f, 0.0f},
-//                 {0.0f, 0.0f, 0.0f, 1.0f}
-//         }
-//     };
-//     return result;
-// }
+    if (std::fabsf(c) < EPSILON) c = 0.0f;
+    if (std::fabsf(s) < EPSILON) s = 0.0f;
+    this->identity();
+    this->setElement(0, 0, c);
+    this->setElement(0, 2, s);
+    this->setElement(2, 0, -s);
+    this->setElement(2, 2, c);
+    return *this;
+}
+
+Matrix4 Matrix4::rotate_z(float degrees)
+{
+    float c = std::cosf(degrees_to_radians(degrees));
+    float s = std::sinf(degrees_to_radians(degrees));
+
+    if (std::fabsf(c) < EPSILON) c = 0.0f;
+    if (std::fabsf(s) < EPSILON) s = 0.0f;
+    this->identity();
+    this->setElement(0, 0, c);
+    this->setElement(0, 1, -s);
+    this->setElement(1, 0, s);
+    this->setElement(1, 1, c);
+    return *this;
+}
 
 
 // Vector4 v4_from_v3(Vector3 vec3)
