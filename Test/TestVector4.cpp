@@ -102,10 +102,9 @@ void TestVector4Add(void)
     float z = TestVector4C.getZ();
     float w = TestVector4C.getW();
 
-    const float epsilion = 1e-5f;
-    assert(std::fabs(x - 31.10f) < epsilion);
-    assert(std::fabs(y - 51.10f) < epsilion);
-    assert(std::fabs(z - 71.10f) < epsilion);
+    assert(floatEqual(x , 31.10f));
+    assert(floatEqual(y , 51.10f));
+    assert(floatEqual(z , 71.10f));
     assert(w == 0.0f);
 }
 
@@ -120,10 +119,9 @@ void TestVector4Sub(void)
     float z = TestVector4C.getZ();
     float w = TestVector4C.getW();
 
-    const float epsilion = 1e-5f;
-    assert(std::fabs(x - -10.00f) < epsilion);
-    assert(std::fabs(y -  20.00f) < epsilion);
-    assert(std::fabs(z -  10.00f) < epsilion);
+    assert(floatEqual(x , -10.00f));
+    assert(floatEqual(y ,  20.00f));
+    assert(floatEqual(z ,  10.00f));
     assert(w == 0.0f);
 }
 
@@ -154,30 +152,29 @@ void TestVectorScale(void)
 
 void TestVector4Cross(void)
 {
-    const float epsilion = 1e-4;
     // Test case 1: Basic orthogonal vectors
     Vector4 a(1.0f, 0.0f, 0.0f, Vector4Type::Direction);
     Vector4 b(0.0f, 1.0f, 0.0f, Vector4Type::Direction);
     Vector4 cross = a.cross(b);
-    assert(std::fabs(cross.getX() - 0.0f) < epsilion);
-    assert(std::fabs(cross.getY() - 0.0f) < epsilion);
-    assert(std::fabs(cross.getZ() - 1.0f) < epsilion);
+    assert(floatEqual(cross.getX() , 0.0f));
+    assert(floatEqual(cross.getY() , 0.0f));
+           assert(floatEqual(cross.getZ() , 1.0f));
 
     // Test case 2: Another simple case
     Vector4 c(2.0f, 3.0f, 4.0f, Vector4Type::Direction);
     Vector4 d(5.0f, 6.0f, 7.0f, Vector4Type::Direction);
     Vector4 cross2 = c.cross(d);
-    assert(std::fabs(cross2.getX() - (-3.0f)) < epsilion);  // 3*7 - 4*6 = -3
-    assert(std::fabs(cross2.getY() - 6.0f) < epsilion);     // 4*5 - 2*7 = 6
-    assert(std::fabs(cross2.getZ() - (-3.0f)) < epsilion);  // 2*6 - 3*5 = -3
+    assert(floatEqual(cross2.getX() , -3.0f));  // 3*7 , 4*6 = -3
+    assert(floatEqual(cross2.getY() , 6.0f));     // 4*5 , 2*7 = 6
+    assert(floatEqual(cross2.getZ() , -3.0f));  // 2*6 , 3*5 = -3
 
     // Test case 3: Cross product with itself should be zero
     Vector4 e(1.0f, 2.0f, 3.0f, Vector4Type::Direction);
     Vector4 cross3 = e.cross(e);
 
-    assert(std::fabs(cross3.getX()) < epsilion);
-    assert(std::fabs(cross3.getY()) < epsilion);
-    assert(std::fabs(cross3.getZ()) < epsilion);
+    assert(floatEqual(cross3.getX(), 0.0f));
+    assert(floatEqual(cross3.getY(), 0.0f));
+    assert(floatEqual(cross3.getZ(), 0.0f));
 
     // Test case 4: Anti-commutative property (a × b = -b × a)
     Vector4 f(1.0f, 2.0f, 3.0f, Vector4Type::Direction);
@@ -185,9 +182,9 @@ void TestVector4Cross(void)
     Vector4 cross_fg = f.cross(g);
     Vector4 cross_gf = g.cross(f);
 
-    assert(std::fabs(cross_fg.getX() + cross_gf.getX()) < epsilion);
-    assert(std::fabs(cross_fg.getY() + cross_gf.getY()) < epsilion);
-    assert(std::fabs(cross_fg.getZ() + cross_gf.getZ()) < epsilion);
+    assert(floatEqual(cross_fg.getX(), -cross_gf.getX()));
+    assert(floatEqual(cross_fg.getY(), -cross_gf.getY()));
+    assert(floatEqual(cross_fg.getZ(), -cross_gf.getZ()));
 }
 
 void TestVector4Length(void)
@@ -205,10 +202,10 @@ void TestVector4Normalize(void)
     float ExpectedX = 1.0f / TestVector4ALength;
     float ExpectedY = 4.0f / TestVector4ALength;
     float ExpectedZ = 8.0f / TestVector4ALength;
-    const float epsilion = 1e-5;
-    assert(std::fabs(TestVector4ANormalized.getX() - ExpectedX) < epsilion);
-    assert(std::fabs(TestVector4ANormalized.getY() - ExpectedY) < epsilion);
-    assert(std::fabs(TestVector4ANormalized.getZ() - ExpectedZ) < epsilion);
+
+    assert(floatEqual(TestVector4ANormalized.getX() , ExpectedX));
+    assert(floatEqual(TestVector4ANormalized.getY() , ExpectedY));
+    assert(floatEqual(TestVector4ANormalized.getZ() , ExpectedZ));
 }
 
 void TestVector4Equal(void)
@@ -232,17 +229,15 @@ void TestVector4Equal(void)
 
 void TestVector4PerspectiveDivide()
 {
-    const float epsilon = 1e-6f;
-
     // Case 1: w == 0 → should return unchanged vector
     {
         Vector4 v(4.0f, 8.0f, 12.0f, Vector4Type::Direction); // Direct w constructor
         Vector4 result = v.perspective_divide();
 
-        assert(std::fabs(result.getX() - 4.0f) < epsilon);
-        assert(std::fabs(result.getY() - 8.0f) < epsilon);
-        assert(std::fabs(result.getZ() - 12.0f) < epsilon);
-        assert(std::fabs(result.getW() - 0.0f) < epsilon);
+        assert(floatEqual(result.getX() , 4.0f));
+        assert(floatEqual(result.getY() , 8.0f));
+        assert(floatEqual(result.getZ() , 12.0f));
+        assert(floatEqual(result.getW() , 0.0f));
     }
 
     // Case 2: w != 0 → should divide x, y, z by w and set type to Point
@@ -250,9 +245,9 @@ void TestVector4PerspectiveDivide()
         Vector4 v(10.0f, 20.0f, 30.0f, 10.0f);
         Vector4 result = v.perspective_divide();
 
-        assert(std::fabs(result.getX() - 1.0f) < epsilon);
-        assert(std::fabs(result.getY() - 2.0f) < epsilon);
-        assert(std::fabs(result.getZ() - 3.0f) < epsilon);
+        assert(floatEqual(result.getX() , 1.0f));
+        assert(floatEqual(result.getY() , 2.0f));
+        assert(floatEqual(result.getZ() , 3.0f));
         assert(result.getType() == Vector4Type::Point);
     }
 
@@ -261,9 +256,9 @@ void TestVector4PerspectiveDivide()
         Vector4 v(6.0f, 9.0f, 12.0f, 3.0f);
         Vector4 result = v.perspective_divide();
 
-        assert(std::fabs(result.getX() - 2.0f) < epsilon);
-        assert(std::fabs(result.getY() - 3.0f) < epsilon);
-        assert(std::fabs(result.getZ() - 4.0f) < epsilon);
+        assert(floatEqual(result.getX() , 2.0f));
+        assert(floatEqual(result.getY() , 3.0f));
+        assert(floatEqual(result.getZ() , 4.0f));
         assert(result.getType() == Vector4Type::Point);
     }
 }
@@ -274,7 +269,7 @@ void RunAllTestCases(const TestCases *Tests)
     for (uint32_t i = 0; i < Tests->count; ++i) {
         Tests->items[i].RunTestCase();
     }
-    printf("SUCESS: All %u Test cases Passed\n", Tests->count);
+    printf("SUCCESS: All %u Test cases Passed\n", Tests->count);
 }
 
 int main(void)
