@@ -19,22 +19,6 @@ void TestCaseMatrix4::RunTestCase()
     printf("INFO: TestCase \"%s\" passed.\n", Matrix4FunctionName);
 }
 
-// Done:
-// float getElement(uint32_t row, uint32_t col) const;
-// void  setElement(uint32_t row, uint32_t col, float element) const;
-// Matrix4 operator+(const Matrix4& other) const;
-// Matrix4 operator-(const Matrix4& other) const;
-// Matrix4 operator*(const Matrix4& other) const;
-// Matrix4 value(float value) const;
-// Matrix4 identity() const;
-// Matrix4 transpose() const;
-// Matrix4 copy() const;
-
-// Remaining:
-// Matrix4 rotate_x(float degrees) const;
-// Matrix4 rotate_y(float degrees) const;
-// Matrix4 rotate_z(float degrees) const;
-
 void TestMatrix4GetElement(void)
 {
     {
@@ -227,6 +211,78 @@ void TestMatrix4Copy(void)
     assert(Original == Copy);
 }
 
+void TestMatrix4Scale(void)
+{
+    Matrix4 result = Matrix4().scale(Vector4(2.0f, 2.0f, 2.0f, Vector4Type::Point));
+    float TestOne = result.getElement(0, 0);
+    float TestTwo = result.getElement(1, 1);
+    float TestThree = result.getElement(2, 2);
+    float TestFour = result.getElement(3, 3);
+    assert(floatEqual(TestOne, 2.0f));
+    assert(floatEqual(TestTwo, 2.0f));
+    assert(floatEqual(TestThree, 2.0f));
+    assert(floatEqual(TestFour, 1.0f));
+}
+
+void TestMatrix4RotateDirection(void)
+{
+    {
+        // Rotated 90 degrees about X
+        Matrix4 RotateX = Matrix4().rotate_x(90.0f);
+        Vector4 Direction = Vector4(0.0f, 2.0f, 0.0f, Vector4Type::Direction);
+        Vector4 RotatedVector4 = RotateX.transform(Direction);
+        // Y will go to Z
+        Vector4 Expected = Vector4(0.0f, 0.0f, 2.0f, Vector4Type::Direction);
+        assert(almostEqual(Expected.getX(), RotatedVector4.getX()));
+        assert(almostEqual(Expected.getY(), RotatedVector4.getY()));
+        assert(almostEqual(Expected.getZ(), RotatedVector4.getZ()));
+        assert(almostEqual(Expected.getW(), RotatedVector4.getW()));
+    }
+    {
+        // Rotated 90 degrees about Y
+        Matrix4 RotateY = Matrix4().rotate_y(90.0f);
+        Vector4 Direction = Vector4(0.0f, 0.0f, 2.0f, Vector4Type::Direction);
+        Vector4 RotatedVector4 = RotateY.transform(Direction);
+        // Z will go to X
+        Vector4 Expected = Vector4(2.0f, 0.0f, 0.0f, Vector4Type::Direction);
+        assert(almostEqual(Expected.getX(), RotatedVector4.getX()));
+        assert(almostEqual(Expected.getY(), RotatedVector4.getY()));
+        assert(almostEqual(Expected.getZ(), RotatedVector4.getZ()));
+        assert(almostEqual(Expected.getW(), RotatedVector4.getW()));
+    }
+    {
+        // Rotated 90 degrees about Z
+        Matrix4 RotateZ = Matrix4().rotate_z(90.0f);
+        Vector4 Direction = Vector4(2.0f, 0.0f, 0.0f, Vector4Type::Direction);
+        Vector4 RotatedVector4 = RotateZ.transform(Direction);
+        // X will go to Y
+        Vector4 Expected = Vector4(0.0f, 2.0f, 0.0f, Vector4Type::Direction);
+        assert(almostEqual(Expected.getX(), RotatedVector4.getX()));
+        assert(almostEqual(Expected.getY(), RotatedVector4.getY()));
+        assert(almostEqual(Expected.getZ(), RotatedVector4.getZ()));
+        assert(almostEqual(Expected.getW(), RotatedVector4.getW()));
+    }
+}
+
+void TestMatrix4Translation(void)
+{
+    Vector4 Add = Vector4(5.0f, 5.0f, 5.0f, Vector4Type::Point);
+    Vector4 Point = Vector4(10.0f, 20.f, 30.0f, Vector4Type::Point);
+    Matrix4 ScaleMatrix = Matrix4().scale(Vector4(2.0f, 2.0f, 2.0f, Vector4Type::Point));
+    Matrix4 RotationMatrix = Matrix4().rotate_x(90.0f);
+    Matrix4 Translation = Matrix4().translate(Add);
+    Matrix4 ModelMatrix = Translation * RotationMatrix * ScaleMatrix;
+    Vector4 TransformedVector4 = ModelMatrix.transform(Point);
+    TransformedVector4.print();
+    // Expected Vector4
+    Vector4 Expected = Vector4(25.00f, -55.00f, 45.00f, Vector4Type::Point);
+    Expected.print();
+    assert(floatEqual(Expected.getX(), TransformedVector4.getX()));
+    assert(floatEqual(Expected.getY(), TransformedVector4.getY()));
+    assert(floatEqual(Expected.getZ(), TransformedVector4.getZ()));
+    assert(floatEqual(Expected.getW(), TransformedVector4.getW()));
+}
+
 typedef ARRAY(TestCaseMatrix4) TestCases;
 void RunAllTestCases(const TestCases *Tests)
 {
@@ -250,6 +306,9 @@ int main(void)
     array_append(TestCaseMatrix4, &Tests, TestCaseMatrix4("TestMatrix4Identity", TestMatrix4Identity));
     array_append(TestCaseMatrix4, &Tests, TestCaseMatrix4("TestMatrixTranspose", TestMatrixTranspose));
     array_append(TestCaseMatrix4, &Tests, TestCaseMatrix4("TestMatrix4Copy", TestMatrix4Copy));
+    array_append(TestCaseMatrix4, &Tests, TestCaseMatrix4("TestMatrix4Scale", TestMatrix4Scale));
+    array_append(TestCaseMatrix4, &Tests, TestCaseMatrix4("TestMatrix4RotateDirection", TestMatrix4RotateDirection));
+    array_append(TestCaseMatrix4, &Tests, TestCaseMatrix4("TestMatrix4Translation",TestMatrix4Translation));
     RunAllTestCases(&Tests);
     return 0;
 }
