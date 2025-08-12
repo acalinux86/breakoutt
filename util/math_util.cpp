@@ -1,4 +1,4 @@
-#include "./math_util.h"
+#include "./math_util.hpp"
 
 // NOTE: VECTOR2 Implementation
 Vector2::Vector2(float x, float y) : x(x), y(y) {}
@@ -124,6 +124,11 @@ Vector3 Vector3::normalize() const
     else return Vector3(getX()/mag, getY()/mag, getZ()/mag);
 }
 
+Vector4 Vector3::to_v4() const
+{
+    return Vector4(getX(), getY(), getZ(), 1.0f);
+}
+
 // NOTE: Vector4 Implementation
 
 // Constructors for Vector4
@@ -138,7 +143,7 @@ void Vector4::print() const
     if (getW() != 0) {
         printf("Point: [%.2f, %.2f, %.2f, %.2f]\n", getX(), getY(), getZ(), getW());
     } else {
-        printf("Direction: [%.2f, %.2f, %.2f, %.2f]\n", getX(), getY(), getZ(), getW());
+        printf("Direction: [%f, %f, %f, %f]\n", getX(), getY(), getZ(), getW());
     }
 }
 
@@ -240,20 +245,19 @@ Vector4 Vector4::perspective_divide() const
 
 bool Vector4::operator==(const Vector4& other) const
 {
-    const float epsilion = 1e-3;
     if (getW() != other.getW()) return false;
     if (getW() == 0) {
-        return (fabs(getX() - other.getX()) < epsilion)
-            && (fabs(getY() - other.getY()) < epsilion)
-            && (fabs(getZ() - other.getZ()) < epsilion)
+        return (floatEqual(getX(), other.getX()))
+            && (floatEqual(getY(), other.getY()))
+            && (floatEqual(getZ(), other.getZ()))
             && (getType() == other.getType());
     } else {
         Vector4 norm_a = perspective_divide();
         Vector4 norm_b = other.perspective_divide();
 
-        return  (fabs(norm_a.getX() - norm_b.getX()) < epsilion)
-            &&  (fabs(norm_a.getY() - norm_b.getY()) < epsilion)
-            &&  (fabs(norm_a.getZ() - norm_b.getZ()) < epsilion)
+        return  (floatEqual(norm_a.getX(), norm_b.getX()))
+            &&  (floatEqual(norm_a.getY(), norm_b.getY()))
+            &&  (floatEqual(norm_a.getZ(), norm_b.getZ()))
             &&  (norm_a.getType() == norm_b.getType());
     }
 }
@@ -263,10 +267,14 @@ bool Vector4::operator!=(const Vector4& other) const
     return !(*this == other);
 }
 
-// Matrix4 Implementation
-static inline void safe_memcpy(Matrix4 *dest, Matrix4 *src)
+Vector3 Vector4::to_v3() const
 {
-    if (src && dest) memcpy(dest, src, sizeof(Matrix4));
+    return Vector3(getX(), getY(), getZ());
+}
+
+Matrix4::Matrix4()
+{
+    memset(rows, 0, sizeof(rows));
 }
 
 void Matrix4::print() const
@@ -284,15 +292,15 @@ void Matrix4::print() const
 
 float Matrix4::getElement(uint32_t row, uint32_t col) const
 {
-    assert(((int)row >= 0 && (int)row < MAT4_ROWS) && "Row Out of Bounds");
-    assert(((int)col >= 0 && (int)col < MAT4_COLS) && "Col Out of Bounds");
+    assert(((int)row >= 0 && (int)row < MAT4_ROWS) && "Access of Out of Bounds Row");
+    assert(((int)col >= 0 && (int)col < MAT4_COLS) && "Access of Out of Bounds Col");
     return rows[row][col];
 }
 
 Matrix4 Matrix4::setElement(uint32_t row, uint32_t col, float element)
 {
-    assert(((int)row >= 0 && (int)row < MAT4_ROWS) && "Row Out of Bounds");
-    assert(((int)col >= 0 && (int)col < MAT4_COLS) && "Col Out of Bounds");
+    assert(((int)row >= 0 && (int)row < MAT4_ROWS) && "Access of Out of Bounds Row");
+    assert(((int)col >= 0 && (int)col < MAT4_COLS) && "Access of Out of Bounds Col");
     rows[row][col] = element;
     return *this;
 }
@@ -389,22 +397,28 @@ Matrix4 Matrix4::transpose() const
 Matrix4 Matrix4::copy()
 {
     Matrix4 result = {};
-    safe_memcpy(&result, this);
+    safeMemcpy(&result, this);
     return result;
 }
 
-static inline float degrees_to_radians(float degrees)
+Matrix4 Matrix4::scale(const Vector4& other) const
 {
-    return degrees * (PI / 180.0f);
+    Matrix4 result = Matrix4().identity();
+    result.setElement(0, 0, other.getX());
+    result.setElement(1, 1, other.getY());
+    result.setElement(2, 2, other.getZ());
+    result.setElement(3, 3, 1.0f);
+    return result;
 }
 
 Matrix4 Matrix4::rotate_x(float degrees)
 {
-    float c = cosf(degrees_to_radians(degrees));
-    float s = sinf(degrees_to_radians(degrees));
+    rows[0][0] = rows[1][1] = rows[2][2] = rows[3][3] = 1.0f;
+    float c = cosf(degreesToRadians(degrees));
+    float s = sinf(degreesToRadians(degrees));
 
-    if (fabsf(c) < EPSILION) c = 0.0f;
-    if (fabsf(s) < EPSILION) s = 0.0f;
+    if (fabsf(c) < ROT_EPSILION) c = 0.0f;
+    if (fabsf(s) < ROT_EPSILION) s = 0.0f;
     this->identity();
     this->setElement(1, 1, c);
     this->setElement(1, 2, -s);
@@ -415,11 +429,12 @@ Matrix4 Matrix4::rotate_x(float degrees)
 
 Matrix4 Matrix4::rotate_y(float degrees)
 {
-    float c = cosf(degrees_to_radians(degrees));
-    float s = sinf(degrees_to_radians(degrees));
+    rows[0][0] = rows[1][1] = rows[2][2] = rows[3][3] = 1.0f;
+    float c = cosf(degreesToRadians(degrees));
+    float s = sinf(degreesToRadians(degrees));
 
-    if (fabsf(c) < EPSILION) c = 0.0f;
-    if (fabsf(s) < EPSILION) s = 0.0f;
+    if (fabsf(c) < ROT_EPSILION) c = 0.0f;
+    if (fabsf(s) < ROT_EPSILION) s = 0.0f;
     this->identity();
     this->setElement(0, 0, c);
     this->setElement(0, 2, s);
@@ -430,11 +445,12 @@ Matrix4 Matrix4::rotate_y(float degrees)
 
 Matrix4 Matrix4::rotate_z(float degrees)
 {
-    float c = cosf(degrees_to_radians(degrees));
-    float s = sinf(degrees_to_radians(degrees));
+    rows[0][0] = rows[1][1] = rows[2][2] = rows[3][3] = 1.0f;
+    float c = cosf(degreesToRadians(degrees));
+    float s = sinf(degreesToRadians(degrees));
 
-    if (fabsf(c) < EPSILION) c = 0.0f;
-    if (fabsf(s) < EPSILION) s = 0.0f;
+    if (fabsf(c) < ROT_EPSILION) c = 0.0f;
+    if (fabsf(s) < ROT_EPSILION) s = 0.0f;
     this->identity();
     this->setElement(0, 0, c);
     this->setElement(0, 1, -s);
@@ -457,85 +473,32 @@ bool Matrix4::operator!=(const Matrix4& other) const
     return !(*this == other);
 }
 
+Vector4 Matrix4::transform(const Vector4& vec4) const
+{
+    /* return v4_init(
+        ((mat_4.row1[0] * vec_4.x) + (mat_4.row1[1] * vec_4.y) + (mat_4.row1[2] * vec_4.z) + (mat_4.row1[3] * vec_4.w)),
+        ((mat_4.row2[0] * vec_4.x) + (mat_4.row2[1] * vec_4.y) + (mat_4.row2[2] * vec_4.z) + (mat_4.row2[3] * vec_4.w)),
+        ((mat_4.row3[0] * vec_4.x) + (mat_4.row3[1] * vec_4.y) + (mat_4.row3[2] * vec_4.z) + (mat_4.row3[3] * vec_4.w)),
+        ((mat_4.row4[0] * vec_4.x) + (mat_4.row4[1] * vec_4.y) + (mat_4.row4[2] * vec_4.z) + (mat_4.row4[3] * vec_4.w))
+    );*/
 
-// Vector4 v4_from_v3(Vector3 vec3)
-// {
-//     return v4_init(vec3.x, vec3.y, vec3.z, 1.0f);
-// }
+    float v4[MAT4_ROWS] = {};
+    for (uint32_t i = 0; i < MAT4_ROWS; ++i) {
+        v4[i] = ((rows[i][0] * vec4.getX()) +
+                 (rows[i][1] * vec4.getY()) +
+                 (rows[i][2] * vec4.getZ()) +
+                 (rows[i][3] * vec4.getW()));
+    }
 
-// Vector3 v3_from_v4(Vector4 vec4)
-// {
-//     return v3_init(vec4.x, vec4.y, vec4.z);
-// }
+    return Vector4(v4[0], v4[1], v4[2], v4[3]);
+}
 
-// Vector4 mv4_transform(Matrix4 mat_4, Vector4 vec_4)
-// {
-//     /* return v4_init(
-//         ((mat_4.row1[0] * vec_4.x) + (mat_4.row1[1] * vec_4.y) + (mat_4.row1[2] * vec_4.z) + (mat_4.row1[3] * vec_4.w)),
-//         ((mat_4.row2[0] * vec_4.x) + (mat_4.row2[1] * vec_4.y) + (mat_4.row2[2] * vec_4.z) + (mat_4.row2[3] * vec_4.w)),
-//         ((mat_4.row3[0] * vec_4.x) + (mat_4.row3[1] * vec_4.y) + (mat_4.row3[2] * vec_4.z) + (mat_4.row3[3] * vec_4.w)),
-//         ((mat_4.row4[0] * vec_4.x) + (mat_4.row4[1] * vec_4.y) + (mat_4.row4[2] * vec_4.z) + (mat_4.row4[3] * vec_4.w))
-//     );*/
-
-//     float v4[MAT4_ROWS] = {0};
-//     for (uint32_t i = 0; i < MAT4_ROWS; ++i) {
-//         v4[i] = ((mat_4.rows[i][0] * vec_4.x) +
-//                  (mat_4.rows[i][1] * vec_4.y) +
-//                  (mat_4.rows[i][2] * vec_4.z) +
-//                  (mat_4.rows[i][3] * vec_4.w));
-//     }
-
-//     return v4_init(v4[0], v4[1], v4[2], v4[3]);
-// }
-
-// Matrix4 mv4_translate(Vector4 vec_4)
-// {
-//     // NOTE: We Only Translate points
-//     Matrix4 result = {
-//         .rows = {
-//                 {1.0f, 0.0f, 0.0f, vec_4.x},
-//                 {0.0f, 1.0f, 0.0f, vec_4.y},
-//                 {0.0f, 0.0f, 1.0f, vec_4.z},
-//                 {0.0f, 0.0f, 0.0f, 1.0f}
-//         }
-//     };
-//     return result;
-// }
-
-// Vector3 to_screen_coords(Vector3 vec3, uint32_t screen_width, uint32_t screen_height)
-// {
-//     Vector4 vec4 = v4_from_v3(vec3);
-//     float x = screen_width / 2.0f;
-//     float y = screen_height / 2.0f;
-
-//     Matrix4 ModelMatrix = {
-//         .rows = {
-//             {x,    0.0f, 0.0f,    x},
-//             {0.0f,   -y, 0.0f,    y},
-//             {0.0f, 0.0f, 1.0f, 0.0f},
-//             {0.0f, 0.0f, 0.0f, 1.0f}
-//         }
-//     };
-
-//     Vector4 TransformedVec4 = mv4_transform(ModelMatrix, vec4);
-//     return v3_from_v4(TransformedVec4);
-// }
-
-// Vector3 to_world_coords(Vector3 vec3, uint32_t screen_width, uint32_t screen_height)
-// {
-//     Vector4 vec4 = v4_from_v3(vec3);
-//     float x = 2.0f / screen_width;
-//     float y = 2.0f / screen_height;
-
-//     Matrix4 ModelMatrix = {
-//         .rows = {
-//             {x,    0.0f, 0.0f,    -1},
-//             {0.0f,    y, 0.0f,    -1},
-//             {0.0f, 0.0f, 1.0f, 0.0f},
-//             {0.0f, 0.0f, 0.0f, 1.0f}
-//         }
-//     };
-
-//     Vector4 TransformedVec4 = mv4_transform(ModelMatrix, vec4);
-//     return v3_from_v4(TransformedVec4);
-// }
+Matrix4 Matrix4::translate(const Vector4& vec4) const
+{
+    // NOTE: We Only Translate points
+    ASSERT_POINT(vec4);
+    return Matrix4().identity()
+        .setElement(0, 3, vec4.getX())
+        .setElement(1, 3, vec4.getY())
+        .setElement(2, 3, vec4.getZ());
+}

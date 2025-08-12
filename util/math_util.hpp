@@ -8,6 +8,12 @@
 #include <cstdint>
 #include <cassert>
 
+// Forward declarations
+struct Vector2;
+struct Vector3;
+struct Vector4;
+struct Matrix4;
+
 // Vector2
 struct Vector2 {
 public:
@@ -44,7 +50,7 @@ public:
     float   operator*(const Vector3& other) const;
     float length() const;
     Vector3 normalize() const;
-
+    Vector4 to_v4() const;
 private:
     float x;
     float y;
@@ -78,6 +84,7 @@ public:
     float length() const;
     Vector4 normalize() const;
     Vector4 perspective_divide() const;
+    Vector3 to_v3() const;
 private:
     float x;
     float y;
@@ -96,10 +103,12 @@ private:
 #define MAT4_ROWS 4
 #define MAT4_COLS 4
 #define PI 3.14593f
-#define EPSILION 1e-3f
+#define EPSILION 0.15f
+#define ROT_EPSILION 1e-5f
 
 struct Matrix4 {
 public:
+    Matrix4();
     void print() const;
 
     float getElement(uint32_t row, uint32_t col) const;
@@ -111,27 +120,35 @@ public:
     Matrix4 identity() const;
     Matrix4 transpose() const;
     Matrix4 copy();
+    Matrix4 scale(const Vector4& other) const;
     Matrix4 rotate_x(float degrees);
     Matrix4 rotate_y(float degrees);
     Matrix4 rotate_z(float degrees);
     bool operator==(const Matrix4& other) const;
     bool operator!=(const Matrix4& other) const;
+    Vector4 transform(const Vector4& vec4) const;
+    Matrix4 translate(const Vector4& vec4) const;
 private:
     float rows[MAT4_ROWS][MAT4_COLS];
 };
 
-// // Matvec (Matrix and Vector related Operations)
-
-// Vector4 v4_from_v3(Vector3 vec3);
-// Vector3 v3_from_v4(Vector4 vec4);
-// Vector4 mv4_transform(Matrix4 mat_4, Vector4 vec_4);
-// Matrix4 mv4_translate(Vector4 vec_4);
-// Vector3 to_screen_coords(Vector3 vec3, uint32_t screen_width, uint32_t screen_height);
-// Vector3 to_world_coords(Vector3 vec3, uint32_t screen_width, uint32_t screen_height);
-
 // Helper Functions
 static inline bool floatEqual(float a, float b) {
     return fabsf(a - b) <= EPSILION;
+}
+
+static inline bool almostEqual(float a, float b) {
+    return fabsf(a - b) < 5e-3f;
+}
+
+static inline void safeMemcpy(Matrix4 *dest, Matrix4 *src)
+{
+    if (src && dest) memcpy(dest, src, sizeof(Matrix4));
+}
+
+static inline float degreesToRadians(float degrees)
+{
+    return degrees * (PI / 180.0f);
 }
 
 #endif // MATH_UTIL_H
