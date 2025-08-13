@@ -28,7 +28,6 @@ public:
     float length() const; // NOTE: returns the Magnitude of a Vector
     Vector2 normalize() const;
 
-private:
     float x;
     float y;
 };
@@ -51,7 +50,7 @@ public:
     float length() const;
     Vector3 normalize() const;
     Vector4 to_v4() const;
-private:
+
     float x;
     float y;
     float z;
@@ -85,7 +84,7 @@ public:
     Vector4 normalize() const;
     Vector4 perspective_divide() const;
     Vector3 to_v3() const;
-private:
+
     float x;
     float y;
     float z;
