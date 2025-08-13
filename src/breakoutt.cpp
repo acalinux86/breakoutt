@@ -16,8 +16,9 @@ Tile::Tile(Vector2 position, Vector2 size):
 
 void Tile::stats() const
 {
-    printf("Ball Info: \n");
+    printf("Tile Info: \n");
     printf("    Position: ");
     Position.print();
-    printf("    Radius: %.2f\n", Radius);
+    printf("    Size: ");
+    Size.print();
 }
