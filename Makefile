@@ -17,8 +17,8 @@ build/math_util.o: util/math_util.cpp | build
 
 breakoutt: build/breakoutt
 
-build/breakoutt: src/breakoutt.cpp build/math_util.o | build
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+build/breakoutt: src/breakoutt.cpp src/breakoutt_main.cpp build/math_util.o | build
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS) -lGLEW -lSDL2 -lGL
 
 run_breakoutt:
 	./build/breakoutt
