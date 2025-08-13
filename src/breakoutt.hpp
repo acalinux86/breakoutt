@@ -11,6 +11,7 @@
 struct Ball;
 struct Game;
 struct Tile;
+struct Color;
 typedef ARRAY(Ball) Balls;
 
 struct Ball {
@@ -44,6 +45,15 @@ private:
     Tile tile;
 };
 
+struct Color {
+public:
+    Color(float r, float g, float b, float a);
+    void print() const;
+    float r;
+    float g;
+    float b;
+    float a;
+};
 
 // Opengl Shader Related Functions
 char *read_file(const char *file_path, uint8_t *size);

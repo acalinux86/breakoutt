@@ -3,6 +3,11 @@
 #define SCREEN_WIDTH  800 // Window width
 #define SCREEN_HEIGHT 600 // Window height
 
+struct Vertex {
+    Vector3 Position;
+    Color color;
+};
+
 int main(void) {
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -71,6 +76,55 @@ int main(void) {
     if (ProgramId == 0) return 1;
     printf("ProgramId: %u\n", ProgramId);
 
+    // Structure: [X, Y, Z, R, G, B, A]
+    Vertex vertices[] = {
+        {Vector3(0.0f,  0.75f, 0.0f),  Color(1.0f, 0.0f, 0.0f, 1.0f)},  // Red (top vertex)
+        {Vector3(0.0f,  -0.75f, 0.0f),  Color(0.0f, 1.0f, 0.0f, 1.0f)},  // Green (bottom-left)
+        {Vector3(0.5f, -0.75f, 0.0f),  Color(0.0f, 0.0f, 1.0f, 1.0f)}   // Blue (bottom-right)
+    };
+
+    GLuint indices[3] = {0, 1, 2};
+
+    for (uint32_t i = 0; i < 3; ++i) {
+        vertices[i].Position.print();
+        vertices[i].color.print();
+    }
+
+    Vector3 offset[] = {Vector3(0.0f, 0.0f, 0.0f)};
+
+    GLuint VBO;
+    GLuint VAO;
+    GLuint EBO;
+    GLuint instanceVBO;
+
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Position));
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+    glEnableVertexAttribArray(1);
+
+    // Create a buffer for offsets
+    glGenBuffers(1, &instanceVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(offset), offset, GL_STATIC_DRAW);
+
+    //glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), (void*)0);
+    glVertexAttribDivisor(2, 1);  // 1 = advance per instance (not per vertex)
+
+    glUseProgram(ProgramId);
+
     bool quit = false;  // Main loop flag
     SDL_Event e; // Event handler
     // Game loop
@@ -84,6 +138,12 @@ int main(void) {
         }
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        // Update GPU buffer
+        glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(offset), offset);
+        glBindVertexArray(VAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0, 1);
         calculate_fps(&last_time, &frame_count);
         SDL_GL_SwapWindow(window);
     }

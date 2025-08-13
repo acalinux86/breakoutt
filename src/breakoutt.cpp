@@ -49,3 +49,11 @@ void Tile::stats() const
     printf("    Size: ");
     Size.print();
 }
+
+Color::Color(float r, float g, float b, float a):
+    r(r), g(g), b(b), a(a) {}
+
+void Color::print() const
+{
+    printf("Color: [r: %.2f, g: %.2f, b: %.2f, a: %.2f]\n", r, g, b, a);
+}
