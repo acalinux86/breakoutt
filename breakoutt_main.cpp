@@ -1,22 +1,7 @@
-#include "./breakoutt.hpp"
-
-#include <SDL2/SDL.h>
-#include <GL/glew.h>
+#include "./src/breakoutt.hpp"
 
 #define SCREEN_WIDTH  800 // Window width
 #define SCREEN_HEIGHT 600 // Window height
-
-void calculate_fps(double *last_time, double *frame_count)
-{
-    double current_time = (double) SDL_GetTicks() * 0.001f;
-    (*frame_count)++;
-    if (current_time - *last_time > 1.0f) {
-        double fps = *frame_count / (current_time - *last_time);
-        printf("FPS: %.2lf\n", fps);
-        *frame_count = 0.0;
-        *last_time = current_time;
-    }
-}
 
 int main(void) {
     // Initialize SDL
@@ -64,7 +49,7 @@ int main(void) {
     }
 
     // 0 to disable VSync, 1 to enable
-    int swapInterval = SDL_GL_SetSwapInterval(0);
+    int swapInterval = SDL_GL_SetSwapInterval(1);
     if (swapInterval != 0 ) {
         fprintf(stderr, "Setting Swap Interval Failed: %s\n", SDL_GetError());
         SDL_DestroyWindow(window);
@@ -72,26 +57,33 @@ int main(void) {
         return 1;
     }
 
+    int getSwapInterVal = SDL_GL_GetSwapInterval();
+    if (getSwapInterVal == 0) printf("Vsync Disabled\n");
+    else printf("Vsync Enabled\n");
+
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     double last_time = (double) SDL_GetTicks() * 0.001f;
     double frame_count = 0.0;
 
+    GLuint ProgramId = LoadShader("shader/vertex_shader.vert", "shader/fragment_shader.frag");
+    if (ProgramId == 0) return 1;
+    printf("ProgramId: %u\n", ProgramId);
+
     bool quit = false;  // Main loop flag
+    SDL_Event e; // Event handler
     // Game loop
     while (!quit) {
-        SDL_Event e; // Event handler
         // Handle events on queue
-        while (SDL_PollEvent(&e) != 0) {
+        while (SDL_PollEvent(&e)) {
             // User requests quit
             if (e.type == SDL_QUIT) {
                 quit = true;
             }
         }
-        glClearColor(1.0f, 1.0f, 1.0f, 0.1f);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-
         calculate_fps(&last_time, &frame_count);
         SDL_GL_SwapWindow(window);
     }
