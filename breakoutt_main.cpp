@@ -2,11 +2,21 @@
 
 #define SCREEN_WIDTH  800 // Window width
 #define SCREEN_HEIGHT 600 // Window height
+#define RADIUS 0.1f
+#define ASPECT_RATIO ((float)SCREEN_WIDTH / (float)SCREEN_HEIGHT)
+#define FPS 60
+#define DELTA_TIME   ((float) 1 / (float)FPS)
+#define MAX_UPDATES 5
+#define RED (Color(1.0f, 0.0f, 0.0f, 1.0f))
+#define GREEN (Color(0.0f, 1.0f, 0.0f, 1.0f))
+#define BLUE (Color(0.0f, 0.0f, 1.0f, 1.0f))
+#define WHITE (Color(1.0f, 1.0f, 1.0f, 1.0f))
 
-struct Vertex {
-    Vector3 Position;
-    Color color;
-};
+Indices BallIndices = {nullptr, 0, 0};
+Vertices BallVertices = {nullptr, 0, 0};
+
+Indices TileIndices = {nullptr, 0, 0};
+Vertices TileVertices = {nullptr, 0, 0};
 
 int main(void) {
     // Initialize SDL
@@ -62,6 +72,8 @@ int main(void) {
         return 1;
     }
 
+    glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
     int getSwapInterVal = SDL_GL_GetSwapInterval();
     if (getSwapInterVal == 0) printf("Vsync Disabled\n");
     else printf("Vsync Enabled\n");
@@ -76,59 +88,38 @@ int main(void) {
     if (ProgramId == 0) return 1;
     printf("ProgramId: %u\n", ProgramId);
 
-    // Structure: [X, Y, Z, R, G, B, A]
-    Vertex vertices[] = {
-        {Vector3(0.0f,  0.75f, 0.0f),  Color(1.0f, 0.0f, 0.0f, 1.0f)},  // Red (top vertex)
-        {Vector3(0.0f,  -0.75f, 0.0f),  Color(0.0f, 1.0f, 0.0f, 1.0f)},  // Green (bottom-left)
-        {Vector3(0.5f, -0.75f, 0.0f),  Color(0.0f, 0.0f, 1.0f, 1.0f)}   // Blue (bottom-right)
-    };
+    Vector3 BallPos(0.0f, 0.0f, 0.0f);
+    Vector3 BallVel(0.0f, 0.5f, 0.0f);
 
-    GLuint indices[3] = {0, 1, 2};
+    Ball ball = Ball(BallPos, RADIUS, WHITE, BallVel, 12*10, BallIndices, BallVertices);
+    ball.GenerateBall();
+    ball.RenderBall();
 
-    for (uint32_t i = 0; i < 3; ++i) {
-        vertices[i].Position.print();
-        vertices[i].color.print();
-    }
-
-    Vector3 offset[] = {Vector3(0.0f, 0.0f, 0.0f)};
-
-    GLuint VBO;
-    GLuint VAO;
-    GLuint EBO;
-    GLuint instanceVBO;
-
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Position));
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
-    glEnableVertexAttribArray(1);
-
-    // Create a buffer for offsets
-    glGenBuffers(1, &instanceVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(offset), offset, GL_STATIC_DRAW);
-
-    //glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), (void*)0);
-    glVertexAttribDivisor(2, 1);  // 1 = advance per instance (not per vertex)
+    Vector3 TilePos = Vector3(0.0f, -0.9f, 0.0f);
+    Vector3 TileSize = Vector3(0.1f, 0.05, 0.0f);
+    Tile tile = Tile(TilePos, TileSize, GREEN, TileIndices, TileVertices);
+    tile.GenerateTile();
+    tile.RenderTile();
 
     glUseProgram(ProgramId);
+    GLint aspectRatioLoc = glGetUniformLocation(ProgramId, "aspectRatio");
+    if (aspectRatioLoc == -1) {
+        printf("ERROR: Could not find aspectRatio uniform location\n");
+    }
+    glUniform1f(aspectRatioLoc, ASPECT_RATIO);
 
     bool quit = false;  // Main loop flag
     SDL_Event e; // Event handler
+    auto previous_time = SDL_GetTicks();
+    auto accumulated = 0.0f;
+
     // Game loop
     while (!quit) {
+        auto current_time = SDL_GetTicks();
+        auto frame_time = current_time - previous_time;
+        previous_time = current_time;
+        accumulated += frame_time / 1000.0f;
+
         // Handle events on queue
         while (SDL_PollEvent(&e)) {
             // User requests quit
@@ -136,14 +127,35 @@ int main(void) {
                 quit = true;
             }
         }
+
+        int updates = 0;
+        // Fixed timestep update
+        while (accumulated >= DELTA_TIME && updates < MAX_UPDATES) {
+            // Update ball position
+            ball.Position.x += ball.Velocity.x * DELTA_TIME;
+            ball.Position.y += ball.Velocity.y * DELTA_TIME;
+
+            // Boundary checking (simple example)
+            if (ball.Position.x + RADIUS > 1.0f || ball.Position.x - RADIUS < -1.0f) {
+                ball.Velocity.x *= -1.0f;
+            }
+            if (ball.Position.y + RADIUS > 1.0f || ball.Position.y - RADIUS < -1.0f) {
+                ball.Velocity.y *= -1.0f;
+            }
+
+            accumulated -= DELTA_TIME;
+        }
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        // Regenerate ball vertices with new position
+        ball.UpdateBall();
+
         // Update GPU buffer
-        glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(offset), offset);
-        glBindVertexArray(VAO);
-        glDrawElementsInstanced(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0, 1);
+        glBindVertexArray(ball.VAO);
+        glDrawElements(GL_TRIANGLES, ball.indices.count, GL_UNSIGNED_INT, (void*) 0);
+        glBindVertexArray(tile.VAO);
+        glDrawElements(GL_TRIANGLES, tile.indices.count, GL_UNSIGNED_INT, (void*) 0);
         calculate_fps(&last_time, &frame_count);
         SDL_GL_SwapWindow(window);
     }
