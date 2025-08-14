@@ -15,6 +15,9 @@
 Indices BallIndices = {nullptr, 0, 0};
 Vertices BallVertices = {nullptr, 0, 0};
 
+Indices TileIndices = {nullptr, 0, 0};
+Vertices TileVertices = {nullptr, 0, 0};
+
 int main(void) {
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -85,32 +88,18 @@ int main(void) {
     if (ProgramId == 0) return 1;
     printf("ProgramId: %u\n", ProgramId);
 
-    Vector3 Pos(0.0f, 0.0f, 0.0f);
-    Vector3 Vel(0.0f, 0.5f, 0.0f);
+    Vector3 BallPos(0.0f, 0.0f, 0.0f);
+    Vector3 BallVel(0.0f, 0.5f, 0.0f);
 
-    Ball ball = Ball(Pos, RADIUS, WHITE, Vel, 12*10, BallIndices, BallVertices);
+    Ball ball = Ball(BallPos, RADIUS, WHITE, BallVel, 12*10, BallIndices, BallVertices);
+    ball.GenerateBall();
     ball.RenderBall();
 
-    GLuint VBO;
-    GLuint VAO;
-    GLuint EBO;
-
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, ball.vertices.count*sizeof(ball.vertices.items[0]), ball.vertices.items, GL_STATIC_DRAW);
-
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, ball.indices.count*sizeof(ball.indices.items[0]), ball.indices.items, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Position));
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
-    glEnableVertexAttribArray(1);
+    Vector3 TilePos = Vector3(0.0f, -0.9f, 0.0f);
+    Vector3 TileSize = Vector3(0.1f, 0.05, 0.0f);
+    Tile tile = Tile(TilePos, TileSize, GREEN, TileIndices, TileVertices);
+    tile.GenerateTile();
+    tile.RenderTile();
 
     glUseProgram(ProgramId);
     GLint aspectRatioLoc = glGetUniformLocation(ProgramId, "aspectRatio");
@@ -160,15 +149,13 @@ int main(void) {
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Regenerate ball vertices with new position
-        ball.RenderBall();
-
-        // Update vertex buffer
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, ball.vertices.count * sizeof(ball.vertices.items[0]), ball.vertices.items);
+        ball.UpdateBall();
 
         // Update GPU buffer
-        glBindVertexArray(VAO);
+        glBindVertexArray(ball.VAO);
         glDrawElements(GL_TRIANGLES, ball.indices.count, GL_UNSIGNED_INT, (void*) 0);
+        glBindVertexArray(tile.VAO);
+        glDrawElements(GL_TRIANGLES, tile.indices.count, GL_UNSIGNED_INT, (void*) 0);
         calculate_fps(&last_time, &frame_count);
         SDL_GL_SwapWindow(window);
     }

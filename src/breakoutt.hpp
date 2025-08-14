@@ -38,7 +38,9 @@ public:
          Vertices vertices);
     ~Ball();
     void stats() const;
+    void GenerateBall();
     void RenderBall();
+    void UpdateBall();
 
     Vector3 Position;
     float Radius;
@@ -47,6 +49,9 @@ public:
     int vCount;
     Indices indices;
     Vertices vertices;
+    GLuint VBO;
+    GLuint VAO;
+    GLuint EBO;
 };
 
 struct Tile {
@@ -54,13 +59,18 @@ public:
     Tile(Vector3 position, Vector3 size, Color color, Indices indices, Vertices vertices);
     ~Tile();
     void stats() const;
+    void GenerateTile();
     void RenderTile();
+    void UpdateTile();
 
     Vector3 Position;
     Vector3 Size;
     Color color;
     Indices indices;
     Vertices vertices;
+    GLuint VBO;
+    GLuint VAO;
+    GLuint EBO;
 };
 
 struct Game {

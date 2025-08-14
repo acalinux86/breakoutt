@@ -39,7 +39,7 @@ void Ball::stats() const
     array_analysis(&indices);
 }
 
-void Ball::RenderBall()
+void Ball::GenerateBall()
 {
     if (vertices.items) array_delete(&vertices);
     if (indices.items) array_delete(&indices);
@@ -65,6 +65,36 @@ void Ball::RenderBall()
         array_append(uint32_t, &indices, i + 1);
         array_append(uint32_t, &indices, i + 2);
     }
+}
+
+void Ball::RenderBall()
+{
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.count*sizeof(vertices.items[0]), vertices.items, GL_STATIC_DRAW);
+
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.count*sizeof(indices.items[0]), indices.items, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Position));
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+    glEnableVertexAttribArray(1);
+}
+
+void Ball::UpdateBall()
+{
+    // Regenerate ball vertices with new position
+    GenerateBall();
+
+    // Update vertex buffer
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.count * sizeof(vertices.items[0]), vertices.items);
 }
 
 Tile::Tile(Vector3 position, Vector3 size, Color color,
@@ -94,7 +124,7 @@ void Tile::stats() const
     array_analysis(&indices);
 }
 
-void Tile::RenderTile()
+void Tile::GenerateTile()
 {
     if (vertices.items) array_delete(&vertices);
     if (indices.items) array_delete(&indices);
@@ -122,6 +152,26 @@ void Tile::RenderTile()
     for (uint32_t i = 0; i < 6; ++i) {
         array_append(uint32_t, &indices, quad_indices[i]);
     }
+}
+
+void Tile::RenderTile()
+{
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.count*sizeof(vertices.items[0]), vertices.items, GL_STATIC_DRAW);
+
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.count*sizeof(indices.items[0]), indices.items, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Position));
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+    glEnableVertexAttribArray(1);
 }
 
 Vertex::Vertex(Vector3 Position, Color color):
