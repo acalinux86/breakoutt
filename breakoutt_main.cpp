@@ -2,11 +2,65 @@
 
 #define SCREEN_WIDTH  800 // Window width
 #define SCREEN_HEIGHT 600 // Window height
+#define RADIUS 0.25f
+#define ASPECT_RATIO ((float)SCREEN_WIDTH / (float)SCREEN_HEIGHT)
 
 struct Vertex {
     Vector3 Position;
     Color color;
+    Vertex(Vector3 Position, Color color):
+        Position(Position), color(color) {}
 };
+
+typedef ARRAY(Vertex) Vertices;
+typedef ARRAY(uint32_t) Indices;
+
+Vertices vertices = {nullptr, 0, 0};
+Indices indices = {nullptr, 0, 0};
+
+#define RED (Color(1.0f, 0.0f, 0.0f, 1.0f))
+#define GREEN (Color(0.0f, 1.0f, 0.0f, 1.0f))
+#define BLUE (Color(0.0f, 0.0f, 1.0f, 1.0f))
+
+int randomNumber()
+{
+    int min = 1;
+    int max = 3;
+    return (rand() % (max - min + 1)) + min;
+}
+
+void buildCircle(int vCount)
+{
+    float angle = 360.0f / vCount;
+
+    int triangleCount = vCount - 2;
+    array_new(&indices, uint32_t);
+    array_new(&vertices, Vertex);
+
+    // positions
+    for (int i = 0; i < vCount; i++)
+    {
+        float currentAngle = angle * i;
+        float x = RADIUS * cosf(degreesToRadians(currentAngle)) * ASPECT_RATIO;
+        float y = RADIUS * sinf(degreesToRadians(currentAngle)) * ASPECT_RATIO;
+        float z = 0.0f;
+
+        if (randomNumber() == 1) {
+            array_append(Vertex, &vertices, Vertex(Vector3(x, y, z), RED));
+        } else if (randomNumber() == 2) {
+            array_append(Vertex, &vertices, Vertex(Vector3(x, y, z), BLUE));
+        } else {
+            array_append(Vertex, &vertices, Vertex(Vector3(x, y, z), GREEN));
+        }
+    }
+
+    for (int i = 0; i < triangleCount; i++)
+    {
+        array_append(uint32_t, &indices, 0);
+        array_append(uint32_t, &indices, i + 1);
+        array_append(uint32_t, &indices, i + 2);
+    }
+}
 
 int main(void) {
     // Initialize SDL
@@ -62,6 +116,8 @@ int main(void) {
         return 1;
     }
 
+    glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
     int getSwapInterVal = SDL_GL_GetSwapInterval();
     if (getSwapInterVal == 0) printf("Vsync Disabled\n");
     else printf("Vsync Enabled\n");
@@ -76,52 +132,28 @@ int main(void) {
     if (ProgramId == 0) return 1;
     printf("ProgramId: %u\n", ProgramId);
 
-    // Structure: [X, Y, Z, R, G, B, A]
-    Vertex vertices[] = {
-        {Vector3(0.0f,  0.75f, 0.0f),  Color(1.0f, 0.0f, 0.0f, 1.0f)},  // Red (top vertex)
-        {Vector3(0.0f,  -0.75f, 0.0f),  Color(0.0f, 1.0f, 0.0f, 1.0f)},  // Green (bottom-left)
-        {Vector3(0.5f, -0.75f, 0.0f),  Color(0.0f, 0.0f, 1.0f, 1.0f)}   // Blue (bottom-right)
-    };
-
-    GLuint indices[3] = {0, 1, 2};
-
-    for (uint32_t i = 0; i < 3; ++i) {
-        vertices[i].Position.print();
-        vertices[i].color.print();
-    }
-
-    Vector3 offset[] = {Vector3(0.0f, 0.0f, 0.0f)};
+    buildCircle(12*30);
 
     GLuint VBO;
     GLuint VAO;
     GLuint EBO;
-    GLuint instanceVBO;
 
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.count*sizeof(vertices.items[0]), vertices.items, GL_STATIC_DRAW);
 
     glGenBuffers(1, &EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.count*sizeof(indices.items[0]), indices.items, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Position));
     glEnableVertexAttribArray(0);
 
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
     glEnableVertexAttribArray(1);
-
-    // Create a buffer for offsets
-    glGenBuffers(1, &instanceVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(offset), offset, GL_STATIC_DRAW);
-
-    //glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), (void*)0);
-    glVertexAttribDivisor(2, 1);  // 1 = advance per instance (not per vertex)
 
     glUseProgram(ProgramId);
 
@@ -140,10 +172,8 @@ int main(void) {
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Update GPU buffer
-        glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(offset), offset);
         glBindVertexArray(VAO);
-        glDrawElementsInstanced(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0, 1);
+        glDrawElements(GL_TRIANGLE_FAN, indices.count, GL_UNSIGNED_INT, (void*) 0);
         calculate_fps(&last_time, &frame_count);
         SDL_GL_SwapWindow(window);
     }
