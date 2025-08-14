@@ -5,8 +5,12 @@ layout(location = 1) in vec4 aColor;
 
 out vec4 vertex_color;
 
+uniform float aspectRatio;
 void main()
 {
-    gl_Position = vec4(vertexPosition_pixels, 1.0);
+    vec3 pos = vertexPosition_pixels;
+    pos.x/= aspectRatio;
+    
+    gl_Position = vec4(pos, 1.0);
     vertex_color = aColor;
 }

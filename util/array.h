@@ -79,7 +79,7 @@
 
 // NOTE: Output the Array x-tics
 #define array_analysis(array)\
-    printf("Array Count: %u\nArray Capacity: %u\n\n", (array)->count, (array)->capacity);\
+    printf("Array Count: %u\n    Array Capacity: %u\n\n", (array)->count, (array)->capacity);\
 
 #define array_clear(array)  \
     do {                    \
