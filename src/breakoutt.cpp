@@ -97,10 +97,10 @@ void Ball::UpdateBall()
     glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.count * sizeof(vertices.items[0]), vertices.items);
 }
 
-Tile::Tile(Vector3 position, Vector3 size, Color color,
-           Indices indices, Vertices vertices):
-    Position(position), Size(size), color(color),
-    indices(indices), vertices(vertices)
+Tile::Tile(Vector3 position, Vector3 size, Vector3 velocity,
+           Color color, Indices indices, Vertices vertices):
+    Position(position), Size(size), Velocity(velocity),
+    color(color), indices(indices), vertices(vertices)
 {}
 
 Tile::~Tile()
@@ -128,6 +128,9 @@ void Tile::GenerateTile()
 {
     if (vertices.items) array_delete(&vertices);
     if (indices.items) array_delete(&indices);
+
+    array_new(&indices, uint32_t);
+    array_new(&vertices, Vertex);
 
     // Calculate corner positions
     Vector3 half_size = Size *  0.5f;
@@ -172,6 +175,38 @@ void Tile::RenderTile()
 
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
     glEnableVertexAttribArray(1);
+}
+
+void Tile::UpdateTile()
+{
+    // Regenerate Tile vertices with new position
+    GenerateTile();
+
+    // Update vertex buffer
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.count * sizeof(vertices.items[0]), vertices.items);
+}
+
+void BallBounds(Ball *ball)
+{
+    // Boundary checking (simple example)
+    if (ball->Position.x + ball->Radius > 1.0f || ball->Position.x - ball->Radius < -1.0f) {
+        ball->Velocity.x *= -1.0f;
+    }
+
+    if (ball->Position.y + ball->Radius > 1.0f || ball->Position.y - ball->Radius < -1.0f) {
+        ball->Velocity.y *= -1.0f;
+    }
+}
+
+void TileBounds(Tile *tile)
+{
+    if (tile->Position.x > 1.0f) {
+        tile->Position.x = 1.0f;
+    }
+    if(tile->Position.x < -1.0f) {
+        tile->Position.x = -1.0f;
+    }
 }
 
 Vertex::Vertex(Vector3 Position, Color color):

@@ -7,6 +7,7 @@
 #define FPS 60
 #define DELTA_TIME   ((float) 1 / (float)FPS)
 #define MAX_UPDATES 5
+
 #define RED (Color(1.0f, 0.0f, 0.0f, 1.0f))
 #define GREEN (Color(0.0f, 1.0f, 0.0f, 1.0f))
 #define BLUE (Color(0.0f, 0.0f, 1.0f, 1.0f))
@@ -89,15 +90,16 @@ int main(void) {
     printf("ProgramId: %u\n", ProgramId);
 
     Vector3 BallPos(0.0f, 0.0f, 0.0f);
-    Vector3 BallVel(0.0f, 0.5f, 0.0f);
-
+    Vector3 BallVel(1.0f, 1.0f, 0.0f);
     Ball ball = Ball(BallPos, RADIUS, WHITE, BallVel, 12*10, BallIndices, BallVertices);
+
     ball.GenerateBall();
     ball.RenderBall();
 
     Vector3 TilePos = Vector3(0.0f, -0.9f, 0.0f);
-    Vector3 TileSize = Vector3(0.1f, 0.05, 0.0f);
-    Tile tile = Tile(TilePos, TileSize, GREEN, TileIndices, TileVertices);
+    Vector3 TileSize = Vector3(0.4f, 0.05, 0.0f);
+    Vector3 TileVel = Vector3(1.0f, 0.00f, 0.0f);
+    Tile tile = Tile(TilePos, TileSize, TileVel, GREEN, TileIndices, TileVertices);
     tile.GenerateTile();
     tile.RenderTile();
 
@@ -120,29 +122,38 @@ int main(void) {
         previous_time = current_time;
         accumulated += frame_time / 1000.0f;
 
+        bool leftPressed = false;
+        bool rightPressed = false;
+
         // Handle events on queue
         while (SDL_PollEvent(&e)) {
             // User requests quit
             if (e.type == SDL_QUIT) {
                 quit = true;
+            } else if (e.type == SDL_KEYDOWN) {
+                switch (e.key.keysym.sym) {
+                case SDLK_LEFT: leftPressed = true; break;
+                case SDLK_RIGHT: rightPressed = true; break;
+                }
+            } else if (e.type == SDL_KEYUP) {
+                switch (e.key.keysym.sym) {
+                case SDLK_LEFT: leftPressed = false; break;
+                case SDLK_RIGHT: rightPressed = false; break;
+                }
             }
         }
 
         int updates = 0;
         // Fixed timestep update
         while (accumulated >= DELTA_TIME && updates < MAX_UPDATES) {
+            if (leftPressed)  tile.Position.x -= tile.Velocity.x * DELTA_TIME * 2;
+            if (rightPressed) tile.Position.x += tile.Velocity.x * DELTA_TIME * 2;
             // Update ball position
             ball.Position.x += ball.Velocity.x * DELTA_TIME;
             ball.Position.y += ball.Velocity.y * DELTA_TIME;
-
-            // Boundary checking (simple example)
-            if (ball.Position.x + RADIUS > 1.0f || ball.Position.x - RADIUS < -1.0f) {
-                ball.Velocity.x *= -1.0f;
-            }
-            if (ball.Position.y + RADIUS > 1.0f || ball.Position.y - RADIUS < -1.0f) {
-                ball.Velocity.y *= -1.0f;
-            }
-
+            // Ball Tile Collission
+            BallBounds(&ball);
+            TileBounds(&tile);
             accumulated -= DELTA_TIME;
         }
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -150,12 +161,15 @@ int main(void) {
 
         // Regenerate ball vertices with new position
         ball.UpdateBall();
+        // Regenerate Tile vertices with new position
+        tile.UpdateTile();
 
         // Update GPU buffer
         glBindVertexArray(ball.VAO);
         glDrawElements(GL_TRIANGLES, ball.indices.count, GL_UNSIGNED_INT, (void*) 0);
         glBindVertexArray(tile.VAO);
         glDrawElements(GL_TRIANGLES, tile.indices.count, GL_UNSIGNED_INT, (void*) 0);
+
         calculate_fps(&last_time, &frame_count);
         SDL_GL_SwapWindow(window);
     }
