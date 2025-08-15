@@ -56,7 +56,7 @@ public:
 
 struct Tile {
 public:
-    Tile(Vector3 position, Vector3 size, Color color, Indices indices, Vertices vertices);
+    Tile(Vector3 position, Vector3 size, Vector3 velocity, Color color, Indices indices, Vertices vertices);
     ~Tile();
     void stats() const;
     void GenerateTile();
@@ -65,9 +65,11 @@ public:
 
     Vector3 Position;
     Vector3 Size;
+    Vector3 Velocity;
     Color color;
     Indices indices;
     Vertices vertices;
+
     GLuint VBO;
     GLuint VAO;
     GLuint EBO;
@@ -80,6 +82,9 @@ struct Game {
     Balls balls;
     Tile tile;
 };
+
+void BallBounds(Ball *ball);
+void TileBounds(Tile *tile);
 
 // Opengl Shader Related Functions
 char *read_file(const char *file_path, uint8_t *size);
